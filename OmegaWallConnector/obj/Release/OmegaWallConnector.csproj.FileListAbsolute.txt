@@ -1,0 +1,37 @@
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaDeskConnector\bin\Release\TouchAPIConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectDepthViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectSkeletonViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectDepthViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectSkeletonViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.GUI.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.Properties.Resources.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\GenerateResource.read.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\GenerateResource.write.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectDepthViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectSkeletonViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector_MarkupCompile.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector_MarkupCompile.lref
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectDepthViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\KinectSkeletonViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.g.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.GUI.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.Properties.Resources.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\GenerateResource.read.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\GenerateResource.write.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Project Files\omegalib\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Release\OmegaWallConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector_MarkupCompile.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector_MarkupCompile.lref
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Release\OmegaWallConnector.g.resources

@@ -1,0 +1,65 @@
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaDeskConnector\bin\Debug\TouchAPIConnector.exe.config
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe.config
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.pdb
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\ResolveAssemblyReference.cache
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaTableConnector.GUI.resources
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\PQ_SDK_MultiTouchSample.Properties.Resources.resources
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.read.1.tlog
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.write.1.tlog
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.exe
+S:\Visual Studio 2008\Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector_MarkupCompile.cache
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector_MarkupCompile.lref
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.g.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.GUI.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.Properties.Resources.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\TouchAPIConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector_MarkupCompile.cache
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector_MarkupCompile.lref
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\TouchAPIConnector.g.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.GUI.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.Properties.Resources.resources
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\Current Projects\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectDepthViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\KinectSkeletonViewer.baml
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.GUI.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.Properties.Resources.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\OmegaWallConnector.exe.config
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\bin\Debug\OmegaWallConnector.pdb
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector_MarkupCompile.cache
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector_MarkupCompile.lref
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.g.resources
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.exe
+C:\Users\Arthur Nishimoto\Desktop\EVL\Kinect\OmegaWallConnector\OmegaWallConnector\obj\Debug\OmegaWallConnector.pdb

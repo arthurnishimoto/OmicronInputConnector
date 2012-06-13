@@ -1,0 +1,2 @@
+PQMTClient.dll is not reference but run time dll needed,
+so please copy the dll to the run time path.
