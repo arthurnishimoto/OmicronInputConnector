@@ -22,6 +22,7 @@ using System.IO;
 
 using System.Windows.Threading; // For DispatcherTimer
 
+using System.Windows.Media.Imaging; //
 using Microsoft.Kinect;
 
 // Needed to grab dll Reference from:
@@ -37,6 +38,11 @@ namespace OmegaWallConnector
 {
     class KinectManager
     {
+        public enum SkeletonMode { Off, Default, Seated };
+        public enum SkeletonChooser { Default, Closest1Player, Closest2Player, Sticky1Player, Sticky2Player, MostActive1Player, MostActive2Player };
+
+        static SkeletonMode skeletonMode = SkeletonMode.Default;
+
         // Kinect Sensor Interface (single Kinect use only - any use of this may break on multi-Kinect use)
         static KinectSensor kinect; // Currently used for audio and elevation control
 
@@ -57,9 +63,9 @@ namespace OmegaWallConnector
         private Skeleton[] skeletonData;
 
         // ---- Image Displays ----
-        //private KinectColorViewer kinectcolorViewer;
+        //private KinectColorViewer kinectColorViewer;
         private KinectDepthViewer kinectDepthViewer;
-        private KinectSkeletonViewer KinectSkeletonViewerOnDepth;
+        //private KinectSkeletonViewer KinectSkeletonViewerOnDepth;
 
         // ---- Audio Processing ----
         private SpeechRecognitionEngine speechRecognizer;
@@ -74,8 +80,16 @@ namespace OmegaWallConnector
 
         public KinectManager(GUI p, TouchAPI_Server o)
         {
+            //kinectColorViewer = new KinectColorViewer(p);
             kinectDepthViewer = new KinectDepthViewer(p);
-            KinectSkeletonViewerOnDepth = new KinectSkeletonViewer(p);
+
+            //KinectSkeletonViewerOnDepth = new KinectSkeletonViewer(p);
+            //KinectSkeletonViewerOnDepth.ShowBones = true;
+            //KinectSkeletonViewerOnDepth.ShowJoints = true;
+            //KinectSkeletonViewerOnDepth.ShowCenter = true;
+            //KinectSkeletonViewerOnDepth.ImageType = ImageType.Depth;
+
+            //ShowBones="true" ShowJoints="true" ShowCenter="true" ImageType="Depth"
             server = o;
             gui = p;
             KinectStart();
@@ -155,9 +169,22 @@ namespace OmegaWallConnector
             sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
             sensor.DepthStream.Enable(DepthImageFormat.Resolution320x240Fps30);
 
+            switch(skeletonMode)
+            {
+                case(SkeletonMode.Off):
+                    break;
+                case(SkeletonMode.Seated): 
+                    sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                    break;
+                default:
+                    sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                    break;
+            }
+
             // Inform the viewers of the Kinect KinectSensor.
+            //kinectColorViewer.Kinect = sensor;
             kinectDepthViewer.Kinect = sensor;
-            KinectSkeletonViewerOnDepth.Kinect = sensor;
+            //KinectSkeletonViewerOnDepth.Kinect = sensor;
 
             // ---- Skeleton Service ----
             sensor.SkeletonFrameReady += this.SkeletonsReady;
@@ -198,6 +225,10 @@ namespace OmegaWallConnector
             readyTimer.Start();
 
             DisableVoiceInterface();
+
+            Console.WriteLine("Kinect Elevation Range: "+sensor.MinElevationAngle + " " + sensor.MaxElevationAngle);
+            Console.WriteLine("Kinect Current Elevation: "+sensor.ElevationAngle);
+
             return sensor;
         }
 
@@ -222,14 +253,37 @@ namespace OmegaWallConnector
 
         public int GetKinectElevation()
         {
-            return kinect.ElevationAngle;
+            if (kinect != null)
+                return kinect.ElevationAngle;
+            else
+                return 0;
         }
 
         public void SetKinectElevation(int angle)
         {
-            timeSinceLastElevationChange = 0;
-            updateElevation = true;
-            newElevation = angle;
+            if (kinect != null)
+            {
+                timeSinceLastElevationChange = 0;
+                updateElevation = true;
+                newElevation = angle;
+            }
+        }
+
+        public void SetSkeletonModeDefault()
+        {
+            if (kinect != null)
+                kinect.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+        }
+
+        public void SetSkeletonModeSeated()
+        {
+            if (kinect != null)
+                kinect.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+        }
+
+        public SkeletonMode GetSkeletonMode()
+        {
+            return skeletonMode;
         }
 
         // Kinect enabled apps should uninitialize all Kinect services that were initialized in InitializeKinectServices() here.
@@ -240,7 +294,7 @@ namespace OmegaWallConnector
             sensor.SkeletonFrameReady -= this.SkeletonsReady;
 
             kinectDepthViewer.Kinect = null;
-            KinectSkeletonViewerOnDepth.Kinect = null;
+            //KinectSkeletonViewerOnDepth.Kinect = null;
 
             if (speechRecognizer != null)
             {
@@ -315,17 +369,17 @@ namespace OmegaWallConnector
                             //SendKinectDataLegacyOIS(JointType.WristRight, skeleton.Joints[JointType.WristRight].Position);
                             SendKinectData(skeleton.TrackingId, JointType.HandRight, skeleton.Joints[JointType.HandRight].Position);
 
-                            //SendKinectDataLegacyOIS(JointType.HipCenter, skeleton.Joints[JointType.HipCenter].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.HipCenter, skeleton.Joints[JointType.HipCenter].Position);
 
                             //SendKinectDataLegacyOIS(JointType.HipLeft, skeleton.Joints[JointType.HipLeft].Position);
-                            //SendKinectDataLegacyOIS(JointType.KneeLeft, skeleton.Joints[JointType.KneeLeft].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.KneeLeft, skeleton.Joints[JointType.KneeLeft].Position);
                             //SendKinectDataLegacyOIS(JointType.AnkleLeft, skeleton.Joints[JointType.AnkleLeft].Position);
-                            //SendKinectDataLegacyOIS(JointType.FootLeft, skeleton.Joints[JointType.FootLeft].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.FootLeft, skeleton.Joints[JointType.FootLeft].Position);
 
                             //SendKinectDataLegacyOIS(JointType.HipRight, skeleton.Joints[JointType.HipRight].Position);
-                            //SendKinectDataLegacyOIS(JointType.KneeRight, skeleton.Joints[JointType.KneeRight].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.KneeRight, skeleton.Joints[JointType.KneeRight].Position);
                             //SendKinectDataLegacyOIS(JointType.AnkleRight, skeleton.Joints[JointType.AnkleRight].Position);
-                            //SendKinectDataLegacyOIS(JointType.FootRight, skeleton.Joints[JointType.FootRight].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.FootRight, skeleton.Joints[JointType.FootRight].Position);
 
                         }
 
@@ -582,6 +636,8 @@ namespace OmegaWallConnector
             double sourceAngle = kinect.AudioSource.SoundSourceAngle;
             double sourceAngleConfidence = kinect.AudioSource.SoundSourceAngleConfidence;
 
+            server.SendKinectSpeech(-1, e.Result.Text, sourceAngle, sourceAngleConfidence);
+
             status += " Source Angle " + sourceAngle + " " + sourceAngleConfidence;
             if (voiceConsoleText)
                 Console.WriteLine(status);
@@ -643,7 +699,7 @@ namespace OmegaWallConnector
                 {
                     if (voiceConsoleText)
                         Console.WriteLine("\nRunning Command \t'{1}' on \t{0}", said.system, said.command);
-                    server.SendKinectSpeech(0, (int)said.command, (int)said.system);
+                    server.SendKinectSpeech(0, (int)said.command, (int)said.system, sourceAngle, sourceAngleConfidence);
                 }
             }// if minConfidence
         }// SreSpeechRecognized

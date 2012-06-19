@@ -1,8 +1,0 @@
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\bin\x64\Release\TouchAPIConnector.exe
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\bin\x64\Release\TouchAPIConnector.pdb
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\ResolveAssemblyReference.cache
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\OmegaTableConnector.GUI.resources
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\PQ_SDK_MultiTouchSample.Properties.Resources.resources
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\OmegaDeskConnector.csproj.GenerateResource.Cache
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\TouchAPIConnector.exe
-S:\Visual Studio 2008\Projects\OmegaDeskConnector\OmegaDeskConnector\obj\x64\Release\TouchAPIConnector.pdb

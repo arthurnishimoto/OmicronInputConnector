@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmegaWallConnector", "OmegaWallConnector\OmegaWallConnector.csproj", "{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Samples.Kinect.WpfViewers", "..\KinectWpfViewers\Microsoft.Samples.Kinect.WpfViewers.csproj", "{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,12 +19,6 @@ Global
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|x64.ActiveCfg = Release|x64
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|x64.Build.0 = Release|x64
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4DE23893-27E7-423F-9BB6-BA21DAC2C45E}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,7 +9,7 @@ namespace OmegaWallConnector
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
-    using System.IO;
+    using System.IO; // MemoryStream
 
     using Microsoft.Kinect;
 
@@ -110,6 +110,8 @@ namespace OmegaWallConnector
                     encoder.Save(stream);
                     byte[] buffer = stream.GetBuffer();
                     gui.depthImage.Image = new System.Drawing.Bitmap(new MemoryStream(buffer));
+
+                    stream.Close();
 
                     UpdateFrameRate();
                 }

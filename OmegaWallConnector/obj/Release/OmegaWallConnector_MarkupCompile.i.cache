@@ -10,11 +10,11 @@ none
 false
 TRACE
 
-2703862042
+3616531714
 
-17-1390214693
+18-1142060853
 1850633228
-KinectDepthViewer.xaml;KinectSkeletonViewer.xaml;
+KinectColorViewer.xaml;KinectDepthViewer.xaml;KinectSkeletonViewer.xaml;
 
 True
 

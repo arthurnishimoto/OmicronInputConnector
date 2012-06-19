@@ -110,6 +110,9 @@
       <DependentUpon>GUI.cs</DependentUpon>
     </Compile>
     <Compile Include="JointMapping.cs" />
+    <Compile Include="KinectColorViewer.xaml.cs">
+      <DependentUpon>KinectColorViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="KinectDepthViewer.xaml.cs">
       <DependentUpon>KinectDepthViewer.xaml</DependentUpon>
     </Compile>
@@ -181,6 +184,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="KinectColorViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="KinectDepthViewer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

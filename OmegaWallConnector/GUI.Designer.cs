@@ -74,26 +74,30 @@ namespace OmegaWallConnector
             this.label2 = new System.Windows.Forms.Label();
             this.messagePortBox = new System.Windows.Forms.ComboBox();
             this.kinectGroupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.kinectSkeletonOffButton = new System.Windows.Forms.RadioButton();
+            this.kinectSkeletonSeatedButton = new System.Windows.Forms.RadioButton();
+            this.kinectSkeletonDefaultButton = new System.Windows.Forms.RadioButton();
+            this.kinectTiltGroupBox = new System.Windows.Forms.GroupBox();
+            this.elevationLabel = new System.Windows.Forms.Label();
             this.kinectElevationBar = new System.Windows.Forms.TrackBar();
             this.kinectEnabledCheckBox = new System.Windows.Forms.CheckBox();
-            this.skeletonEnableBox = new System.Windows.Forms.CheckBox();
             this.depthImage = new System.Windows.Forms.PictureBox();
             this.kinectSkeletonTextCheckBox = new System.Windows.Forms.CheckBox();
             this.kinectGroupBox2 = new System.Windows.Forms.GroupBox();
             this.kinectAudioDebugTextCheckBox = new System.Windows.Forms.CheckBox();
             this.voiceRecogCheckBox = new System.Windows.Forms.CheckBox();
-            this.elevationLabel = new System.Windows.Forms.Label();
-            this.kinectTiltGroupBox = new System.Windows.Forms.GroupBox();
             this.touchGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.maxBlobSizeBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
             this.clientGroupBox.SuspendLayout();
             this.streamTypeGroupBox.SuspendLayout();
             this.kinectGroupBox1.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.kinectTiltGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.kinectElevationBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).BeginInit();
             this.kinectGroupBox2.SuspendLayout();
-            this.kinectTiltGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // connectServerButton
@@ -245,6 +249,7 @@ namespace OmegaWallConnector
             // pqGestureBox
             // 
             this.pqGestureBox.AutoSize = true;
+            this.pqGestureBox.Enabled = false;
             this.pqGestureBox.Location = new System.Drawing.Point(271, 109);
             this.pqGestureBox.Name = "pqGestureBox";
             this.pqGestureBox.Size = new System.Drawing.Size(131, 17);
@@ -307,12 +312,12 @@ namespace OmegaWallConnector
             this.streamTypeGroupBox.Controls.Add(this.oinputserverRadioButton);
             this.streamTypeGroupBox.Controls.Add(this.oinputLegacyRadioButton);
             this.streamTypeGroupBox.Controls.Add(this.tacTileRadioButton);
-            this.streamTypeGroupBox.Location = new System.Drawing.Point(262, 100);
+            this.streamTypeGroupBox.Location = new System.Drawing.Point(163, 100);
             this.streamTypeGroupBox.Name = "streamTypeGroupBox";
-            this.streamTypeGroupBox.Size = new System.Drawing.Size(137, 100);
+            this.streamTypeGroupBox.Size = new System.Drawing.Size(236, 100);
             this.streamTypeGroupBox.TabIndex = 13;
             this.streamTypeGroupBox.TabStop = false;
-            this.streamTypeGroupBox.Text = "Output Stream Format";
+            this.streamTypeGroupBox.Text = "Default Output Stream Format";
             // 
             // oinputserverRadioButton
             // 
@@ -423,17 +428,85 @@ namespace OmegaWallConnector
             // 
             // kinectGroupBox1
             // 
+            this.kinectGroupBox1.Controls.Add(this.groupBox1);
             this.kinectGroupBox1.Controls.Add(this.kinectTiltGroupBox);
             this.kinectGroupBox1.Controls.Add(this.kinectEnabledCheckBox);
-            this.kinectGroupBox1.Controls.Add(this.skeletonEnableBox);
             this.kinectGroupBox1.Controls.Add(this.depthImage);
             this.kinectGroupBox1.Controls.Add(this.kinectSkeletonTextCheckBox);
             this.kinectGroupBox1.Location = new System.Drawing.Point(425, 12);
             this.kinectGroupBox1.Name = "kinectGroupBox1";
-            this.kinectGroupBox1.Size = new System.Drawing.Size(429, 406);
+            this.kinectGroupBox1.Size = new System.Drawing.Size(429, 384);
             this.kinectGroupBox1.TabIndex = 5;
             this.kinectGroupBox1.TabStop = false;
             this.kinectGroupBox1.Text = "Kinect Skeleton Tracking";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.kinectSkeletonOffButton);
+            this.groupBox1.Controls.Add(this.kinectSkeletonSeatedButton);
+            this.groupBox1.Controls.Add(this.kinectSkeletonDefaultButton);
+            this.groupBox1.Location = new System.Drawing.Point(7, 41);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(140, 95);
+            this.groupBox1.TabIndex = 14;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Skeleton Tracking";
+            // 
+            // kinectSkeletonOffButton
+            // 
+            this.kinectSkeletonOffButton.AutoSize = true;
+            this.kinectSkeletonOffButton.Location = new System.Drawing.Point(6, 64);
+            this.kinectSkeletonOffButton.Name = "kinectSkeletonOffButton";
+            this.kinectSkeletonOffButton.Size = new System.Drawing.Size(66, 17);
+            this.kinectSkeletonOffButton.TabIndex = 13;
+            this.kinectSkeletonOffButton.TabStop = true;
+            this.kinectSkeletonOffButton.Text = "Disabled";
+            this.kinectSkeletonOffButton.UseVisualStyleBackColor = true;
+            this.kinectSkeletonOffButton.MouseClick += new System.Windows.Forms.MouseEventHandler(this.kinectSkeletonOffButton_MouseClick);
+            // 
+            // kinectSkeletonSeatedButton
+            // 
+            this.kinectSkeletonSeatedButton.AutoSize = true;
+            this.kinectSkeletonSeatedButton.Location = new System.Drawing.Point(6, 41);
+            this.kinectSkeletonSeatedButton.Name = "kinectSkeletonSeatedButton";
+            this.kinectSkeletonSeatedButton.Size = new System.Drawing.Size(59, 17);
+            this.kinectSkeletonSeatedButton.TabIndex = 12;
+            this.kinectSkeletonSeatedButton.TabStop = true;
+            this.kinectSkeletonSeatedButton.Text = "Seated";
+            this.kinectSkeletonSeatedButton.UseVisualStyleBackColor = true;
+            this.kinectSkeletonSeatedButton.MouseClick += new System.Windows.Forms.MouseEventHandler(this.kinectSkeletonSeatedButton_MouseClick);
+            // 
+            // kinectSkeletonDefaultButton
+            // 
+            this.kinectSkeletonDefaultButton.AutoSize = true;
+            this.kinectSkeletonDefaultButton.Location = new System.Drawing.Point(6, 18);
+            this.kinectSkeletonDefaultButton.Name = "kinectSkeletonDefaultButton";
+            this.kinectSkeletonDefaultButton.Size = new System.Drawing.Size(59, 17);
+            this.kinectSkeletonDefaultButton.TabIndex = 11;
+            this.kinectSkeletonDefaultButton.TabStop = true;
+            this.kinectSkeletonDefaultButton.Text = "Default";
+            this.kinectSkeletonDefaultButton.UseVisualStyleBackColor = true;
+            this.kinectSkeletonDefaultButton.MouseClick += new System.Windows.Forms.MouseEventHandler(this.kinectSkeletonDefaultButton_MouseClick);
+            // 
+            // kinectTiltGroupBox
+            // 
+            this.kinectTiltGroupBox.Controls.Add(this.elevationLabel);
+            this.kinectTiltGroupBox.Controls.Add(this.kinectElevationBar);
+            this.kinectTiltGroupBox.Location = new System.Drawing.Point(354, 142);
+            this.kinectTiltGroupBox.Name = "kinectTiltGroupBox";
+            this.kinectTiltGroupBox.Size = new System.Drawing.Size(69, 233);
+            this.kinectTiltGroupBox.TabIndex = 2;
+            this.kinectTiltGroupBox.TabStop = false;
+            this.kinectTiltGroupBox.Text = "Tilt Angle";
+            // 
+            // elevationLabel
+            // 
+            this.elevationLabel.AutoSize = true;
+            this.elevationLabel.Location = new System.Drawing.Point(41, 122);
+            this.elevationLabel.Name = "elevationLabel";
+            this.elevationLabel.Size = new System.Drawing.Size(13, 13);
+            this.elevationLabel.TabIndex = 6;
+            this.elevationLabel.Text = "0";
             // 
             // kinectElevationBar
             // 
@@ -457,28 +530,19 @@ namespace OmegaWallConnector
             this.kinectEnabledCheckBox.UseVisualStyleBackColor = true;
             this.kinectEnabledCheckBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.kinectEnabledCheckBox_MouseClick);
             // 
-            // skeletonEnableBox
-            // 
-            this.skeletonEnableBox.AutoSize = true;
-            this.skeletonEnableBox.Location = new System.Drawing.Point(7, 41);
-            this.skeletonEnableBox.Name = "skeletonEnableBox";
-            this.skeletonEnableBox.Size = new System.Drawing.Size(155, 17);
-            this.skeletonEnableBox.TabIndex = 2;
-            this.skeletonEnableBox.Text = "Skeleton Tracking Enabled";
-            this.skeletonEnableBox.UseVisualStyleBackColor = true;
-            // 
             // depthImage
             // 
-            this.depthImage.Location = new System.Drawing.Point(7, 160);
+            this.depthImage.Location = new System.Drawing.Point(7, 142);
             this.depthImage.Name = "depthImage";
-            this.depthImage.Size = new System.Drawing.Size(320, 240);
+            this.depthImage.Size = new System.Drawing.Size(341, 233);
             this.depthImage.TabIndex = 3;
             this.depthImage.TabStop = false;
             // 
             // kinectSkeletonTextCheckBox
             // 
             this.kinectSkeletonTextCheckBox.AutoSize = true;
-            this.kinectSkeletonTextCheckBox.Location = new System.Drawing.Point(269, 18);
+            this.kinectSkeletonTextCheckBox.Enabled = false;
+            this.kinectSkeletonTextCheckBox.Location = new System.Drawing.Point(305, 18);
             this.kinectSkeletonTextCheckBox.Name = "kinectSkeletonTextCheckBox";
             this.kinectSkeletonTextCheckBox.Size = new System.Drawing.Size(118, 17);
             this.kinectSkeletonTextCheckBox.TabIndex = 2;
@@ -489,9 +553,9 @@ namespace OmegaWallConnector
             // 
             this.kinectGroupBox2.Controls.Add(this.kinectAudioDebugTextCheckBox);
             this.kinectGroupBox2.Controls.Add(this.voiceRecogCheckBox);
-            this.kinectGroupBox2.Location = new System.Drawing.Point(425, 424);
+            this.kinectGroupBox2.Location = new System.Drawing.Point(425, 402);
             this.kinectGroupBox2.Name = "kinectGroupBox2";
-            this.kinectGroupBox2.Size = new System.Drawing.Size(429, 40);
+            this.kinectGroupBox2.Size = new System.Drawing.Size(429, 62);
             this.kinectGroupBox2.TabIndex = 6;
             this.kinectGroupBox2.TabStop = false;
             this.kinectGroupBox2.Text = "Kinect Voice Recognition";
@@ -499,7 +563,7 @@ namespace OmegaWallConnector
             // kinectAudioDebugTextCheckBox
             // 
             this.kinectAudioDebugTextCheckBox.AutoSize = true;
-            this.kinectAudioDebugTextCheckBox.Location = new System.Drawing.Point(269, 17);
+            this.kinectAudioDebugTextCheckBox.Location = new System.Drawing.Point(305, 17);
             this.kinectAudioDebugTextCheckBox.Name = "kinectAudioDebugTextCheckBox";
             this.kinectAudioDebugTextCheckBox.Size = new System.Drawing.Size(118, 17);
             this.kinectAudioDebugTextCheckBox.TabIndex = 1;
@@ -518,26 +582,6 @@ namespace OmegaWallConnector
             this.voiceRecogCheckBox.UseVisualStyleBackColor = true;
             this.voiceRecogCheckBox.Click += new System.EventHandler(this.voiceRecogCheckBox_Click);
             // 
-            // elevationLabel
-            // 
-            this.elevationLabel.AutoSize = true;
-            this.elevationLabel.Location = new System.Drawing.Point(41, 122);
-            this.elevationLabel.Name = "elevationLabel";
-            this.elevationLabel.Size = new System.Drawing.Size(13, 13);
-            this.elevationLabel.TabIndex = 6;
-            this.elevationLabel.Text = "0";
-            // 
-            // kinectTiltGroupBox
-            // 
-            this.kinectTiltGroupBox.Controls.Add(this.elevationLabel);
-            this.kinectTiltGroupBox.Controls.Add(this.kinectElevationBar);
-            this.kinectTiltGroupBox.Location = new System.Drawing.Point(354, 160);
-            this.kinectTiltGroupBox.Name = "kinectTiltGroupBox";
-            this.kinectTiltGroupBox.Size = new System.Drawing.Size(69, 240);
-            this.kinectTiltGroupBox.TabIndex = 2;
-            this.kinectTiltGroupBox.TabStop = false;
-            this.kinectTiltGroupBox.Text = "Tilt Angle";
-            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -548,7 +592,7 @@ namespace OmegaWallConnector
             this.Controls.Add(this.touchGroupBox);
             this.Controls.Add(this.kinectGroupBox1);
             this.Name = "GUI";
-            this.Text = "TouchAPI Connector";
+            this.Text = "OmegaWallConnector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);
             this.touchGroupBox.ResumeLayout(false);
             this.touchGroupBox.PerformLayout();
@@ -560,12 +604,14 @@ namespace OmegaWallConnector
             this.streamTypeGroupBox.PerformLayout();
             this.kinectGroupBox1.ResumeLayout(false);
             this.kinectGroupBox1.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.kinectTiltGroupBox.ResumeLayout(false);
+            this.kinectTiltGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.kinectElevationBar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).EndInit();
             this.kinectGroupBox2.ResumeLayout(false);
             this.kinectGroupBox2.PerformLayout();
-            this.kinectTiltGroupBox.ResumeLayout(false);
-            this.kinectTiltGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -608,10 +654,13 @@ namespace OmegaWallConnector
         public System.Windows.Forms.PictureBox depthImage;
         private System.Windows.Forms.CheckBox touchDebugTextCheckBox;
         private System.Windows.Forms.CheckBox touchEnableBox;
-        private System.Windows.Forms.CheckBox skeletonEnableBox;
         private System.Windows.Forms.CheckBox kinectEnabledCheckBox;
         private System.Windows.Forms.TrackBar kinectElevationBar;
         private System.Windows.Forms.GroupBox kinectTiltGroupBox;
         private System.Windows.Forms.Label elevationLabel;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton kinectSkeletonOffButton;
+        private System.Windows.Forms.RadioButton kinectSkeletonSeatedButton;
+        private System.Windows.Forms.RadioButton kinectSkeletonDefaultButton;
     }
 }

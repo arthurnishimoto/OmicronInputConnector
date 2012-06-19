@@ -138,7 +138,8 @@ namespace TouchAPI_PQServer
 
         private bool serverRunning = false;
         private static bool hasData = false; // If server has new touch data
-        private static String dataString;
+        private static String touchAPI_dataString;
+        private static String omegaLegacy_dataString;
 
         // Hold gesture implementation
         private static int[] ID;
@@ -151,7 +152,6 @@ namespace TouchAPI_PQServer
         public TouchAPI_Server(GUI p)
         {
             parent = p;
-            dataString = "";
             clientLock = new Semaphore(1, 1);
             holdLock = new Semaphore(1, 1);
 
@@ -169,21 +169,7 @@ namespace TouchAPI_PQServer
             msgPort = messagePort;
 
             serverThread = new Thread(StartConnector);
-            serverThread.Start();
-
-            switch (outputMode)
-            {
-                case (OutputType.TacTile):
-                    Console.WriteLine("Sending data using TouchAPI (TacTile) format");
-                    break;
-                case (OutputType.OmegaLib_Legacy):
-                    Console.WriteLine("Sending data using OmegaLib Legacy format");
-                    break;
-                case (OutputType.OmegaLib):
-                    Console.WriteLine("Sending data using OmegaLib format");
-                    break;
-            }
-            
+            serverThread.Start();            
         }// startServer
 
         public void StopServer()
@@ -240,7 +226,7 @@ namespace TouchAPI_PQServer
                 Socket newSocket = listener.Accept();
                 Client newClient = new Client(newSocket);
                 //Console.WriteLine("Client {0} connected.", newClient.getAddress() );
-                Console.WriteLine("   Sending data to client on port {0}", newClient.getDataPort().ToString());
+                //Console.WriteLine("   Sending data to client on port {0}", newClient.getDataPort().ToString());
                 addClient(newClient);
                 //Console.WriteLine("   Clients now connected: {0}", clients.Count);
             }
@@ -278,18 +264,37 @@ namespace TouchAPI_PQServer
                 if (client.getDataPort() == c.getDataPort() && client.getAddress() == c.getAddress())
                 {
                     newClient = false;
+
+                    //Update client
+                    Console.WriteLine("Existing client {0}:{1} updated.", c.getAddress(), c.getDataPort() );
+                    client.Update(c);
                 }
             }// foreach
-            
+
             if (newClient)
+            {
                 clients.Add(c);
+                Console.WriteLine("Client {0}:{1} added.", c.getAddress(), c.getDataPort());
+                switch (c.getDataFormat())
+                {
+                    case (OutputType.TacTile):
+                        Console.WriteLine("    Sending data using TouchAPI (TacTile) format");
+                        break;
+                    case (OutputType.OmegaLib_Legacy):
+                        Console.WriteLine("    Sending data using OmegaLib Legacy format");
+                        break;
+                    case (OutputType.OmegaLib):
+                        Console.WriteLine("    Sending data using OmegaLib format");
+                        break;
+                }
+            }
             clientLock.Release();
             parent.updateClientList(getClientList());
         }// addClient
 
         public void addClient(String IPaddress, int dataPort)
         {
-            Client c = new Client(IPaddress, dataPort);
+            Client c = new Client(IPaddress, dataPort, outputMode);
             bool newClient = true;
             clientLock.WaitOne();
             foreach (Client client in clients)
@@ -303,6 +308,19 @@ namespace TouchAPI_PQServer
             {
                 clients.Add(c);
                 Console.WriteLine("Manually opened client " + c.getAddress() + ":" + dataPort);
+                switch (outputMode)
+                {
+                    case (OutputType.TacTile):
+                        Console.WriteLine("    Sending data using TouchAPI (TacTile) format");
+                        break;
+                    case (OutputType.OmegaLib_Legacy):
+                        Console.WriteLine("    Sending data using OmegaLib Legacy format");
+                        break;
+                    case (OutputType.OmegaLib):
+                        Console.WriteLine("    Sending data using OmegaLib format");
+                        break;
+                }
+
             }
             clientLock.Release();
             parent.updateClientList(getClientList());
@@ -330,7 +348,7 @@ namespace TouchAPI_PQServer
             parent.updateClientList(getClientList());
         }// removeClient
 
-        private void sendToClients(String dataString)
+        private void sendToClients(String touchAPI_data, String omegaLibLegacy_data)
         {
             clientLock.WaitOne();
             doneClients.Clear();
@@ -338,7 +356,7 @@ namespace TouchAPI_PQServer
             {
                 if (client.isActive())
                 {
-                    client.sendData(dataString);
+                    client.sendData(touchAPI_data, omegaLibLegacy_data);
                 }
                 else if (!client.isActive()) // Check for inactive clients
                 {
@@ -365,18 +383,11 @@ namespace TouchAPI_PQServer
             DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
             long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
-            switch(outputMode){
-                case( OutputType.TacTile ):
-                    dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-                    hasData = true;
-                    sendToClients(dataString);
-                    break;
-                case( OutputType.OmegaLib_Legacy ):
-                    //dataString = "0" + ":" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-                    break;
-            }
-            //hasData = true;
-            //sendToClients(dataString);
+            touchAPI_dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
+            omegaLegacy_dataString = "0:-1," + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + "," + intensity + " ";
+
+            hasData = true;
+            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
         }
 
         public void SendTouchData(int touchID, float xPosRatio, float yPosRatio, float intensity, float xWidth, float yWidth, int gesture)
@@ -385,19 +396,22 @@ namespace TouchAPI_PQServer
             DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
             long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
-            //dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-            switch (outputMode)
+            touchAPI_dataString = timeStamp + ":q:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + "," + gesture + "," + intensity + " ";
+
+            // Map PQLabs gesture IDs to OmegaLib
+            switch (gesture)
             {
-                case (OutputType.TacTile):
-                    dataString = timeStamp + ":q:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + "," + gesture + "," + intensity + " ";
-                    break;
-                case (OutputType.OmegaLib_Legacy):
-                    dataString = "0:" + gesture + "," + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + " ";
-                    break;
+                case (1): gesture = 4; break; // move
+                case (0): gesture = 5; break; // down
+                case (2): gesture = 6; break; // up
             }
-            //Console.WriteLine(dataString);
+            // Flip y position for OmegaLib format (Flips y by default for TouchAPI)
+            yPosRatio = 1.0f - yPosRatio;
+
+            omegaLegacy_dataString = "0:" + gesture + "," + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + " ";
+
             hasData = true;
-            sendToClients(dataString);
+            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
         }
 
         public void SendMocapData(int userID, int jointID, float xPos, float yPos, float zPos, float xQuat, float yQuat, float zQuat, float wQuat)
@@ -409,44 +423,48 @@ namespace TouchAPI_PQServer
             // This is modified to handle an additional ID parameter to distinguish user and joint IDs.
             //dataString = "8:" + userID + "," + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
 
-            switch (outputMode)
-            {
-                case (OutputType.TacTile):
-                    break;
-                case (OutputType.OmegaLib_Legacy):
-                    dataString = "1:" + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
-                    break;
-                case (OutputType.OSC):
-                    //dataString = "1:" + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
-                    break;
-            }
+            touchAPI_dataString = " ";
+            omegaLegacy_dataString = "8:" + userID + "," + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
 
             hasData = true;
-            sendToClients(dataString);
+            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
         }
 
-        public void SendKinectSpeech(int sourceID, int commandID, int systemID)
+        public void SendKinectSpeech(int sourceID, int commandID, int systemID, double sourceAngle, double sourceAngleConfidence)
         {
             //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
             //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
-            dataString = "7:" + sourceID + "," + commandID + "," + systemID + " ";
-            Console.WriteLine(dataString);
+            touchAPI_dataString = " ";
+            omegaLegacy_dataString = "7:" + sourceID + "," + commandID + "," + systemID + "," + sourceAngle + " ";
+
             hasData = true;
-            sendToClients(dataString);
+            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+        }
+
+        public void SendKinectSpeech(int sourceID, String speechText, double sourceAngle, double sourceAngleConfidence)
+        {
+            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
+            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
+
+            touchAPI_dataString = " ";
+            omegaLegacy_dataString = "7:" + sourceID + "," + speechText + "," + sourceAngle + " ";
+
+            hasData = true;
+            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
         }
 
         public void SendGestureString(string gestureData)
         {
             //timeStamp + ":d:" + tp.id + "," + xPos_ratio + "," + yPos_ratio + "," + 1.0 + " ";
-            DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
-            long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
+            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
+            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
             //dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-            dataString = timeStamp + ":l:" + gestureData + " ";
+            //dataString = timeStamp + ":l:" + gestureData + " ";
             //Console.WriteLine(dataString);
-            hasData = true;
-            sendToClients(dataString);
+            //hasData = true;
+            //sendToClients(dataString);
         }
 
         public void updateHoldData(int[] ids, ArrayList held, float[] x, float[] y, float[] xW, float[] yW)

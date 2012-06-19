@@ -44,7 +44,66 @@ namespace OmegaWallConnector
         private List<Dictionary<JointType, JointMapping>> jointMappings = new List<Dictionary<JointType, JointMapping>>();
         private Skeleton[] skeletonData;
 
-        GUI gui;
+        /// <summary>
+        /// Width of output drawing
+        /// </summary>
+        private const float RenderWidth = 640.0f;
+
+        /// <summary>
+        /// Height of our output drawing
+        /// </summary>
+        private const float RenderHeight = 480.0f;
+
+        /// <summary>
+        /// Thickness of drawn joint lines
+        /// </summary>
+        private const double JointThickness = 3;
+
+        /// <summary>
+        /// Thickness of body center ellipse
+        /// </summary>
+        private const double BodyCenterThickness = 10;
+
+        /// <summary>
+        /// Thickness of clip edge rectangles
+        /// </summary>
+        private const double ClipBoundsThickness = 10;
+
+        /// <summary>
+        /// Brush used to draw skeleton center point
+        /// </summary>
+        private readonly Brush centerPointBrush = Brushes.Blue;
+
+        /// <summary>
+        /// Brush used for drawing joints that are currently tracked
+        /// </summary>
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
+
+        /// <summary>
+        /// Brush used for drawing joints that are currently inferred
+        /// </summary>        
+        private readonly Brush inferredJointBrush = Brushes.Yellow;
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently tracked
+        /// </summary>
+        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently inferred
+        /// </summary>        
+        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
+
+        /// <summary>
+        /// Drawing group for skeleton rendering output
+        /// </summary>
+        private DrawingGroup drawingGroup;
+
+        /// <summary>
+        /// Drawing image that we will display
+        /// </summary>
+        /// 
+        private DrawingImage imageSource;
 
         public KinectSkeletonViewer(GUI g)
         {
@@ -52,7 +111,15 @@ namespace OmegaWallConnector
             this.ShowJoints = true;
             this.ShowBones = true;
             this.ShowCenter = true;
-            gui = g;
+
+            // Create the drawing group we'll use for drawing
+            this.drawingGroup = new DrawingGroup();
+
+            // Create an image source that we can use in our image control
+            this.imageSource = new DrawingImage(this.drawingGroup);
+
+            // Display the drawing using our image control
+            kinectSkeletonImage.Source = this.imageSource;
         }
 
         public bool ShowBones { get; set; }
@@ -99,234 +166,195 @@ namespace OmegaWallConnector
                 return;
             }
 
-            bool haveSkeletonData = false;
+            Skeleton[] skeletons = new Skeleton[0];
 
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
             {
                 if (skeletonFrame != null)
                 {
-                    if (this.skeletonCanvases == null)
-                    {
-                        this.CreateListOfSkeletonCanvases();
-                    }
-
-                    if ((this.skeletonData == null) || (this.skeletonData.Length != skeletonFrame.SkeletonArrayLength))
-                    {
-                        this.skeletonData = new Skeleton[skeletonFrame.SkeletonArrayLength];
-                    }
-
-                    skeletonFrame.CopySkeletonDataTo(this.skeletonData);
-
-                    haveSkeletonData = true;
+                    skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                    skeletonFrame.CopySkeletonDataTo(skeletons);
                 }
             }
 
-            if (haveSkeletonData)
+            using (DrawingContext dc = this.drawingGroup.Open())
             {
-                using (DepthImageFrame depthImageFrame = e.OpenDepthImageFrame())
+                // Draw a transparent background to set the render size
+                dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                if (skeletons.Length != 0)
                 {
-                    if (depthImageFrame != null)
+                    foreach (Skeleton skel in skeletons)
                     {
-                        int trackedSkeletons = 0;
+                        RenderClippedEdges(skel, dc);
 
-                        foreach (Skeleton skeleton in this.skeletonData)
+                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            Dictionary<JointType, JointMapping> jointMapping = this.jointMappings[trackedSkeletons];
-                            jointMapping.Clear();
-
-                            KinectSkeleton skeletonCanvas = this.skeletonCanvases[trackedSkeletons++];
-                            skeletonCanvas.ShowBones = this.ShowBones;
-                            skeletonCanvas.ShowJoints = this.ShowJoints;
-                            skeletonCanvas.ShowCenter = this.ShowCenter;
-
-                            // Transform the data into the correct space
-                            // For each joint, we determine the exact X/Y coordinates for the target view
-                            foreach (Joint joint in skeleton.Joints)
-                            {
-                                Point mappedPoint = this.GetPosition2DLocation(depthImageFrame, joint.Position);
-                                jointMapping[joint.JointType] = new JointMapping
-                                    {
-                                        Joint = joint, 
-                                        MappedPoint = mappedPoint
-                                    };
-                            }
-
-                            // Look up the center point
-                            Point centerPoint = this.GetPosition2DLocation(depthImageFrame, skeleton.Position);
-
-                            // Scale the skeleton thickness
-                            // 1.0 is the desired size at 640 width
-                            double scale = this.RenderSize.Width / 640;
-
-                            skeletonCanvas.RefreshSkeleton(skeleton, jointMapping, centerPoint, scale);
+                            this.DrawBonesAndJoints(skel, dc);
                         }
-
-                        if (ImageType == ImageType.Depth)
+                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
                         {
-                            this.ChooseTrackedSkeletons(this.skeletonData);
+                            dc.DrawEllipse(
+                            this.centerPointBrush,
+                            null,
+                            this.SkeletonPointToScreen(skel.Position),
+                            BodyCenterThickness,
+                            BodyCenterThickness);
                         }
                     }
                 }
+
+                // prevent drawing outside of our render area
+                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
         }
 
-        private Point GetPosition2DLocation(DepthImageFrame depthFrame, SkeletonPoint skeletonPoint)
+        /// <summary>
+        /// Draws indicators to show which edges are clipping skeleton data
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw clipping information for</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private static void RenderClippedEdges(Skeleton skeleton, DrawingContext drawingContext)
         {
-            DepthImagePoint depthPoint = depthFrame.MapFromSkeletonPoint(skeletonPoint);
-
-            switch (ImageType)
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Bottom))
             {
-                case ImageType.Color:
-                    ColorImagePoint colorPoint = depthFrame.MapToColorImagePoint(depthPoint.X, depthPoint.Y, this.Kinect.ColorStream.Format);
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, RenderHeight - ClipBoundsThickness, RenderWidth, ClipBoundsThickness));
+            }
 
-                    // map back to skeleton.Width & skeleton.Height
-                    return new Point(
-                        (int)(this.RenderSize.Width * colorPoint.X / this.Kinect.ColorStream.FrameWidth),
-                        (int)(this.RenderSize.Height * colorPoint.Y / this.Kinect.ColorStream.FrameHeight));
-                case ImageType.Depth:
-                    return new Point(
-                        (int)(this.RenderSize.Width * depthPoint.X / depthFrame.Width),
-                        (int)(this.RenderSize.Height * depthPoint.Y / depthFrame.Height));
-                default:
-                    throw new ArgumentOutOfRangeException("ImageType was a not expected value: " + ImageType.ToString());
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Top))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, RenderWidth, ClipBoundsThickness));
+            }
+
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Left))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(0, 0, ClipBoundsThickness, RenderHeight));
+            }
+
+            if (skeleton.ClippedEdges.HasFlag(FrameEdges.Right))
+            {
+                drawingContext.DrawRectangle(
+                    Brushes.Red,
+                    null,
+                    new Rect(RenderWidth - ClipBoundsThickness, 0, ClipBoundsThickness, RenderHeight));
             }
         }
 
-        private void CreateListOfSkeletonCanvases()
+        /// <summary>
+        /// Draws a skeleton's bones and joints
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
-            this.skeletonCanvases = new List<KinectSkeleton>
+            // Render Torso
+            this.DrawBone(skeleton, drawingContext, JointType.Head, JointType.ShoulderCenter);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.ShoulderRight);
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderCenter, JointType.Spine);
+            this.DrawBone(skeleton, drawingContext, JointType.Spine, JointType.HipCenter);
+            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.HipCenter, JointType.HipRight);
+
+            // Left Arm
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderLeft, JointType.ElbowLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.ElbowLeft, JointType.WristLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.WristLeft, JointType.HandLeft);
+
+            // Right Arm
+            this.DrawBone(skeleton, drawingContext, JointType.ShoulderRight, JointType.ElbowRight);
+            this.DrawBone(skeleton, drawingContext, JointType.ElbowRight, JointType.WristRight);
+            this.DrawBone(skeleton, drawingContext, JointType.WristRight, JointType.HandRight);
+
+            // Left Leg
+            this.DrawBone(skeleton, drawingContext, JointType.HipLeft, JointType.KneeLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.KneeLeft, JointType.AnkleLeft);
+            this.DrawBone(skeleton, drawingContext, JointType.AnkleLeft, JointType.FootLeft);
+
+            // Right Leg
+            this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
+            this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
+            this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
+
+            // Render Joints
+            foreach (Joint joint in skeleton.Joints)
+            {
+                Brush drawBrush = null;
+
+                if (joint.TrackingState == JointTrackingState.Tracked)
                 {
-                    this.skeletonCanvas1,
-                    this.skeletonCanvas2,
-                    this.skeletonCanvas3,
-                    this.skeletonCanvas4,
-                    this.skeletonCanvas5,
-                    this.skeletonCanvas6
-                };
-
-            this.skeletonCanvases.ForEach(s => this.jointMappings.Add(new Dictionary<JointType, JointMapping>()));
-        }
-
-        // NOTE: The ChooseTrackedSkeletons part of the KinectSkeletonViewer would be useful
-        // separate from the SkeletonViewer.
-        private void ChooseTrackedSkeletons(IEnumerable<Skeleton> skeletonDataValue)
-        {
-            switch (TrackingMode)
-            {
-                case TrackingMode.Closest1Player:
-                    this.ChooseClosestSkeletons(skeletonDataValue, 1);
-                    break;
-                case TrackingMode.Closest2Player:
-                    this.ChooseClosestSkeletons(skeletonDataValue, 2);
-                    break;
-                case TrackingMode.Sticky1Player:
-                    this.ChooseOldestSkeletons(skeletonDataValue, 1);
-                    break;
-                case TrackingMode.Sticky2Player:
-                    this.ChooseOldestSkeletons(skeletonDataValue, 2);
-                    break;
-                case TrackingMode.MostActive1Player:
-                    this.ChooseMostActiveSkeletons(skeletonDataValue, 1);
-                    break;
-                case TrackingMode.MostActive2Player:
-                    this.ChooseMostActiveSkeletons(skeletonDataValue, 2);
-                    break;
-            }
-        }
-
-        private void ChooseClosestSkeletons(IEnumerable<Skeleton> skeletonDataValue, int count)
-        {
-            SortedList<float, int> depthSorted = new SortedList<float, int>();
-
-            foreach (Skeleton s in skeletonDataValue)
-            {
-                if (s.TrackingState != SkeletonTrackingState.NotTracked)
-                {
-                    float valueZ = s.Position.Z;
-                    while (depthSorted.ContainsKey(valueZ))
-                    {
-                        valueZ += 0.0001f;
-                    }
-
-                    depthSorted.Add(valueZ, s.TrackingId);
+                    drawBrush = this.trackedJointBrush;
                 }
-            }
-
-            this.ChooseSkeletonsFromList(depthSorted.Values, count);
-        }
-
-        private void ChooseOldestSkeletons(IEnumerable<Skeleton> skeletonDataValue, int count)
-        {
-            List<int> newList = new List<int>();
-            
-            foreach (Skeleton s in skeletonDataValue)
-            {
-                if (s.TrackingState != SkeletonTrackingState.NotTracked)
+                else if (joint.TrackingState == JointTrackingState.Inferred)
                 {
-                    newList.Add(s.TrackingId);
-                }
-            }
-
-            // Remove all elements from the active list that are not currently present
-            this.activeList.RemoveAll(k => !newList.Contains(k));
-
-            // Add all elements that aren't already in the activeList
-            this.activeList.AddRange(newList.FindAll(k => !this.activeList.Contains(k)));
-
-            this.ChooseSkeletonsFromList(this.activeList, count);
-        }
-
-        private void ChooseMostActiveSkeletons(IEnumerable<Skeleton> skeletonDataValue, int count)
-        {
-            foreach (ActivityWatcher watcher in this.recentActivity)
-            {
-                watcher.NewPass();
-            }
-
-            foreach (Skeleton s in skeletonDataValue)
-            {
-                if (s.TrackingState != SkeletonTrackingState.NotTracked)
-                {
-                    ActivityWatcher watcher = this.recentActivity.Find(w => w.TrackingId == s.TrackingId);
-                    if (watcher != null)
-                    {
-                        watcher.Update(s);
-                    }
-                    else
-                    {
-                        this.recentActivity.Add(new ActivityWatcher(s));
-                    }
-                }
-            }
-
-            // Remove any skeletons that are gone
-            this.recentActivity.RemoveAll(aw => !aw.Updated);
-
-            this.recentActivity.Sort();
-            this.ChooseSkeletonsFromList(this.recentActivity.ConvertAll(f => f.TrackingId), count);
-        }
-
-        private void ChooseSkeletonsFromList(IList<int> list, int max)
-        {
-            if (this.Kinect.SkeletonStream.IsEnabled)
-            {
-                int argCount = Math.Min(list.Count, max);
-
-                if (argCount == 0)
-                {
-                    this.Kinect.SkeletonStream.ChooseSkeletons();
+                    drawBrush = this.inferredJointBrush;
                 }
 
-                if (argCount == 1)
+                if (drawBrush != null)
                 {
-                    this.Kinect.SkeletonStream.ChooseSkeletons(list[0]);
-                }
-
-                if (argCount >= 2)
-                {
-                    this.Kinect.SkeletonStream.ChooseSkeletons(list[0], list[1]);
+                    drawingContext.DrawEllipse(drawBrush, null, this.SkeletonPointToScreen(joint.Position), JointThickness, JointThickness);
                 }
             }
+        }
+
+        /// <summary>
+        /// Maps a SkeletonPoint to lie within our render space and converts to Point
+        /// </summary>
+        /// <param name="skelpoint">point to map</param>
+        /// <returns>mapped point</returns>
+        private Point SkeletonPointToScreen(SkeletonPoint skelpoint)
+        {
+            // Convert point to depth space.  
+            // We are not using depth directly, but we do want the points in our 640x480 output resolution.
+            DepthImagePoint depthPoint = this.Kinect.MapSkeletonPointToDepth(
+                                                                             skelpoint,
+                                                                             DepthImageFormat.Resolution640x480Fps30);
+            return new Point(depthPoint.X, depthPoint.Y);
+        }
+
+        /// <summary>
+        /// Draws a bone line between two joints
+        /// </summary>
+        /// <param name="skeleton">skeleton to draw bones from</param>
+        /// <param name="drawingContext">drawing context to draw to</param>
+        /// <param name="jointType0">joint to start drawing from</param>
+        /// <param name="jointType1">joint to end drawing at</param>
+        private void DrawBone(Skeleton skeleton, DrawingContext drawingContext, JointType jointType0, JointType jointType1)
+        {
+            Joint joint0 = skeleton.Joints[jointType0];
+            Joint joint1 = skeleton.Joints[jointType1];
+
+            // If we can't find either of these joints, exit
+            if (joint0.TrackingState == JointTrackingState.NotTracked ||
+                joint1.TrackingState == JointTrackingState.NotTracked)
+            {
+                return;
+            }
+
+            // Don't draw if both points are inferred
+            if (joint0.TrackingState == JointTrackingState.Inferred &&
+                joint1.TrackingState == JointTrackingState.Inferred)
+            {
+                return;
+            }
+
+            // We assume all drawn bones are inferred unless BOTH joints are tracked
+            Pen drawPen = this.inferredBonePen;
+            if (joint0.TrackingState == JointTrackingState.Tracked && joint1.TrackingState == JointTrackingState.Tracked)
+            {
+                drawPen = this.trackedBonePen;
+            }
+
+            drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
 
         private class ActivityWatcher : IComparable<ActivityWatcher>

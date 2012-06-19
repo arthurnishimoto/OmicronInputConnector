@@ -32,6 +32,8 @@ namespace TouchAPI_PQServer
         private int dataPort;
         private UdpClient udpClient;
 
+        private TouchAPI_Server.OutputType dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
+
         // Incoming data from the client.
         private static string data = null;
 
@@ -65,17 +67,29 @@ namespace TouchAPI_PQServer
 
                 // Parse client address and remove the port, leaving the IPAddress of client
                 clientAddress = clientAddress.Substring(0, clientAddress.IndexOf(':'));
-                Console.WriteLine(clientAddress);
+                //Console.WriteLine(clientAddress);
                 IPAddress clientIP = IPAddress.Parse(clientAddress);
-                data = "";
+                
 
                 // Connect to the client's dataport
                 udpClient.Connect(clientIP, dataPort);
                 active = true;
+
+                if (data.Contains("omega_legacy_data_on"))
+                {
+                    dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
+                    //Console.WriteLine("   " + clientAddress + " requested omegaLib legacy data sent on port " + dataPort);
+                }
+                else
+                {
+                    dataFormat = TouchAPI_Server.OutputType.TacTile;
+                    //Console.WriteLine("   " + clientAddress + " requested TouchAPI data sent on port " + dataPort);
+                }
+                data = "";
             }
         }// CTOR
 
-        public Client(String clientAddr, int dataPrt)
+        public Client(String clientAddr, int dataPrt, TouchAPI_Server.OutputType outputType)
         {
             clientID = clientsCreated;
             clientsCreated++;
@@ -93,7 +107,41 @@ namespace TouchAPI_PQServer
             // Connect to the client's dataport
             udpClient.Connect(clientIP, dataPort);
             active = true;
+
+            switch (outputType)
+            {
+                case (TouchAPI_Server.OutputType.TacTile):
+                    dataFormat = TouchAPI_Server.OutputType.TacTile;
+                    break;
+                case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
+                    dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
+                    break;
+            }
         }// CTOR
+
+        public void Update(Client c)
+        {
+            if (c.getAddress() == clientAddress && c.getDataPort() == dataPort)
+            {
+                if (dataFormat != c.getDataFormat())
+                {
+                    dataFormat = c.getDataFormat();
+                    //Console.WriteLine("Existing client "+clientAddress+":"+dataPort+" data format updated:");
+                    switch (dataFormat)
+                    {
+                        case (TouchAPI_Server.OutputType.TacTile):
+                            Console.WriteLine("    Requested data using TouchAPI (TacTile) format");
+                            break;
+                        case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
+                            Console.WriteLine("    Requested data using OmegaLib Legacy format");
+                            break;
+                        case (TouchAPI_Server.OutputType.OmegaLib):
+                            Console.WriteLine("    Requested data using OmegaLib format");
+                            break;
+                    }
+                }
+            }
+        }
 
         public void process()
         {
@@ -106,14 +154,33 @@ namespace TouchAPI_PQServer
             Console.WriteLine(data);
         }// process
 
-        public void sendData(String dataString)
+        public void sendData(String touchAPI_dataString, String omegaLegacy_dataString)
         {
+            String dataString;
+            switch (dataFormat)
+            {
+                case(TouchAPI_Server.OutputType.TacTile):
+                    dataString = touchAPI_dataString;
+                    break;
+                case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
+                    dataString = omegaLegacy_dataString;
+                    break;
+                default:
+                    dataString = omegaLegacy_dataString;
+                    break;
+            }
             try
             {
                 // Sends data string to TouchAPI data port
                 //Console.WriteLine("Sending message '{0}' to {1}", dataString, clientAddress);
                 byte[] msg = Encoding.ASCII.GetBytes(dataString);
                 udpClient.Send(msg, msg.Length);
+
+                if (!handler.Connected)
+                {
+                    Console.WriteLine(clientAddress + " disconnected.");
+                    active = false;
+                }
             }
             catch (SocketException se)
             {
@@ -140,5 +207,11 @@ namespace TouchAPI_PQServer
         {
             return dataPort;
         }// getDataPort
+
+        public TouchAPI_Server.OutputType getDataFormat()
+        {
+            return dataFormat;
+        }// getDataFormat
+
     }// class
 }// namespace

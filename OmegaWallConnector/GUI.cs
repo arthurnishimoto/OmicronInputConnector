@@ -105,6 +105,11 @@ namespace OmegaWallConnector
                             continue;
                         }
 
+                        if (line.Contains("EnableTouch") && line.Contains("true"))
+                        {
+                            touchEnableBox.Checked = true;
+                        }
+
                         if (line.Contains("UseTouchPoints") && line.Contains("true"))
                         {
                             touchManager.SetTouchPoints(true);
@@ -162,6 +167,7 @@ namespace OmegaWallConnector
                             touchClientList.Items.Add(line);
                             touchClientList.Text = line;
                         }
+                        
                     }
                 }
 
@@ -171,6 +177,11 @@ namespace OmegaWallConnector
                 }
                 pqGestureBox.Checked = touchManager.IsPQGesturesEnabled();
                 touchPointBox.Checked = touchManager.IsTouchPointsEnabled();
+
+                if (touchEnableBox.Checked)
+                {
+                    touchManager.InitAndConnectServer();
+                }
 
                 switch (omegaDesk.getOutputType() )
                 {
@@ -182,6 +193,19 @@ namespace OmegaWallConnector
                         break;
                     case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
                         oinputLegacyRadioButton.Checked = true;
+                        break;
+                }
+
+                switch (kinectManager.GetSkeletonMode())
+                {
+                    case (KinectManager.SkeletonMode.Off):
+                        kinectSkeletonOffButton.Checked = true;
+                        break;
+                    case (KinectManager.SkeletonMode.Default):
+                        kinectSkeletonDefaultButton.Checked = true;
+                        break;
+                    case (KinectManager.SkeletonMode.Seated):
+                        kinectSkeletonSeatedButton.Checked = true;
                         break;
                 }
 
@@ -250,6 +274,7 @@ namespace OmegaWallConnector
         {
             touchManager.SetServerIP( touchServerList.Text );
         }
+
 
         // Update what data is sent / displayed on console
         private void touchPointBox_CheckedChanged(object sender, EventArgs e)
@@ -429,6 +454,32 @@ namespace OmegaWallConnector
         {
             kinectManager.SetKinectElevation(kinectElevationBar.Value);
             elevationLabel.Text = kinectElevationBar.Value.ToString();
+        }
+
+        private void kinectSkeletonDefaultButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (kinectSkeletonDefaultButton.Checked)
+            {
+                Console.WriteLine("Kinect Skeleton Mode: Default");
+                kinectManager.SetSkeletonModeDefault();
+            }
+        }
+
+        private void kinectSkeletonSeatedButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (kinectSkeletonSeatedButton.Checked)
+            {
+                Console.WriteLine("Kinect Skeleton Mode: Seated");
+                kinectManager.SetSkeletonModeSeated();
+            }
+        }
+
+        private void kinectSkeletonOffButton_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (kinectSkeletonOffButton.Checked)
+            {
+                Console.WriteLine("Kinect Skeleton Mode: Off");
+            }
         }
     }
     

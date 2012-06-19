@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 
-2703862042
+3616531714
 
-16-1118716871
+17-870563031
 1850633228
-KinectDepthViewer.xaml;KinectSkeletonViewer.xaml;
+KinectColorViewer.xaml;KinectDepthViewer.xaml;KinectSkeletonViewer.xaml;
 
 False
 
