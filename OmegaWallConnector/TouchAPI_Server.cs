@@ -442,13 +442,13 @@ namespace TouchAPI_PQServer
             sendToClients(touchAPI_dataString, omegaLegacy_dataString);
         }
 
-        public void SendKinectSpeech(int sourceID, String speechText, double sourceAngle, double sourceAngleConfidence)
+        public void SendKinectSpeech(int sourceID, String speechText, double resultConfidence, double sourceAngle, double sourceAngleConfidence)
         {
             //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
             //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
             touchAPI_dataString = " ";
-            omegaLegacy_dataString = "7:" + sourceID + "," + speechText + "," + sourceAngle + " ";
+            omegaLegacy_dataString = "7:" + sourceID + "," + speechText + "," + resultConfidence + "," + sourceAngle + "," + sourceAngleConfidence + " ";
 
             hasData = true;
             sendToClients(touchAPI_dataString, omegaLegacy_dataString);

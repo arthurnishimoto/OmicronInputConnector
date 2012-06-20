@@ -636,7 +636,7 @@ namespace OmegaWallConnector
             double sourceAngle = kinect.AudioSource.SoundSourceAngle;
             double sourceAngleConfidence = kinect.AudioSource.SoundSourceAngleConfidence;
 
-            server.SendKinectSpeech(-1, e.Result.Text, sourceAngle, sourceAngleConfidence);
+            server.SendKinectSpeech(-1, e.Result.Text, e.Result.Confidence, sourceAngle, sourceAngleConfidence);
 
             status += " Source Angle " + sourceAngle + " " + sourceAngleConfidence;
             if (voiceConsoleText)
