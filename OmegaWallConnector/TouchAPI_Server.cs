@@ -30,12 +30,13 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace TouchAPI_PQServer
 {
+    public enum ServiceType { POINTER, MOCAP, KEYBOARD, CONTROLLER, UI, GENERIC, BRAIN, WAND, AUDIO, SPEECH, KINECT };
     public class Event
     {
         public int sourceID;
         public int eventID;
         public int serviceID;
-        public int serviceType;
+        public ServiceType serviceType;
 
         public float[] dataArray;
         int dataArraySize = 0;
@@ -72,7 +73,7 @@ namespace TouchAPI_PQServer
                 return -1;
         }
 
-        public int getServiceType()
+        public ServiceType getServiceType()
         {
             return serviceType;
         }
@@ -113,9 +114,9 @@ namespace TouchAPI_PQServer
     {
         private static Boolean ENABLE_HOLD = false;
 
-        public enum OutputType { TacTile, OmegaLib_Legacy, OmegaLib, OSC };
+        public enum OutputType { TacTile, Omicron_Legacy, Omicron, OSC };
 
-        private OutputType outputMode = OutputType.OmegaLib_Legacy;
+        private OutputType outputMode = OutputType.Omicron_Legacy;
 
         // UdpClient port - TouchAPI message port
         private static int msgPort = 7340;
@@ -139,7 +140,7 @@ namespace TouchAPI_PQServer
         private bool serverRunning = false;
         private static bool hasData = false; // If server has new touch data
         private static String touchAPI_dataString;
-        private static String omegaLegacy_dataString;
+        private static String omicronLegacy_dataString;
 
         // Hold gesture implementation
         private static int[] ID;
@@ -221,14 +222,14 @@ namespace TouchAPI_PQServer
                 
             while(serverRunning){
                 listener.Listen(10);
-                
+
                 // Program is suspended while waiting for an incoming connection.
                 Socket newSocket = listener.Accept();
                 Client newClient = new Client(newSocket);
                 //Console.WriteLine("Client {0} connected.", newClient.getAddress() );
                 //Console.WriteLine("   Sending data to client on port {0}", newClient.getDataPort().ToString());
                 addClient(newClient);
-                //Console.WriteLine("   Clients now connected: {0}", clients.Count);
+                Console.WriteLine("   Clients now connected: {0}", clients.Count);
             }
         }// StartListening
 
@@ -280,11 +281,11 @@ namespace TouchAPI_PQServer
                     case (OutputType.TacTile):
                         Console.WriteLine("    Sending data using TouchAPI (TacTile) format");
                         break;
-                    case (OutputType.OmegaLib_Legacy):
-                        Console.WriteLine("    Sending data using OmegaLib Legacy format");
+                    case (OutputType.Omicron_Legacy):
+                        Console.WriteLine("    Sending data using Omicron Legacy format");
                         break;
-                    case (OutputType.OmegaLib):
-                        Console.WriteLine("    Sending data using OmegaLib format");
+                    case (OutputType.Omicron):
+                        Console.WriteLine("    Sending data using Omicron format");
                         break;
                 }
             }
@@ -313,11 +314,11 @@ namespace TouchAPI_PQServer
                     case (OutputType.TacTile):
                         Console.WriteLine("    Sending data using TouchAPI (TacTile) format");
                         break;
-                    case (OutputType.OmegaLib_Legacy):
-                        Console.WriteLine("    Sending data using OmegaLib Legacy format");
+                    case (OutputType.Omicron_Legacy):
+                        Console.WriteLine("    Sending data using Omicron Legacy format");
                         break;
-                    case (OutputType.OmegaLib):
-                        Console.WriteLine("    Sending data using OmegaLib format");
+                    case (OutputType.Omicron):
+                        Console.WriteLine("    Sending data using Omicron format");
                         break;
                 }
 
@@ -348,7 +349,7 @@ namespace TouchAPI_PQServer
             parent.updateClientList(getClientList());
         }// removeClient
 
-        private void sendToClients(String touchAPI_data, String omegaLibLegacy_data)
+        private void sendToClients(String touchAPI_data, String OmicronLegacy_data)
         {
             clientLock.WaitOne();
             doneClients.Clear();
@@ -356,7 +357,7 @@ namespace TouchAPI_PQServer
             {
                 if (client.isActive())
                 {
-                    client.sendData(touchAPI_data, omegaLibLegacy_data);
+                    client.sendData(touchAPI_data, OmicronLegacy_data);
                 }
                 else if (!client.isActive()) // Check for inactive clients
                 {
@@ -384,10 +385,10 @@ namespace TouchAPI_PQServer
             long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
             touchAPI_dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-            omegaLegacy_dataString = "0:-1," + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + "," + intensity + " ";
+            omicronLegacy_dataString = (int)ServiceType.POINTER + ":-1," + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + "," + intensity + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
         }
 
         public void SendTouchData(int touchID, float xPosRatio, float yPosRatio, float intensity, float xWidth, float yWidth, int gesture)
@@ -398,20 +399,20 @@ namespace TouchAPI_PQServer
 
             touchAPI_dataString = timeStamp + ":q:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + "," + gesture + "," + intensity + " ";
 
-            // Map PQLabs gesture IDs to OmegaLib
+            // Map PQLabs gesture IDs to Omicron
             switch (gesture)
             {
                 case (1): gesture = 4; break; // move
                 case (0): gesture = 5; break; // down
                 case (2): gesture = 6; break; // up
             }
-            // Flip y position for OmegaLib format (Flips y by default for TouchAPI)
+            // Flip y position for Omicron format (Flips y by default for TouchAPI)
             yPosRatio = 1.0f - yPosRatio;
 
-            omegaLegacy_dataString = "0:" + gesture + "," + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + " ";
+            omicronLegacy_dataString = (int)ServiceType.POINTER + ":" + gesture + "," + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
         }
 
         public void SendMocapData(int userID, int jointID, float xPos, float yPos, float zPos, float xQuat, float yQuat, float zQuat, float wQuat)
@@ -419,15 +420,16 @@ namespace TouchAPI_PQServer
             //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
             //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
-            // OmegaLib/Omicron typically only has one ID paraemeter followed by 3 position and 4 orientation.
+            // Omicron/Omicron typically only has one ID paraemeter followed by 3 position and 4 orientation.
             // This is modified to handle an additional ID parameter to distinguish user and joint IDs.
-            //dataString = "8:" + userID + "," + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
+            // original: 'mocap:id,xPos,yPos,zPos,xQuat,yQuat,zQuat,wQuat '
+            // new: 'mocap:id,xPos,yPos,zPos,xQuat,yQuat,zQuat,wQuat,userID '
 
             touchAPI_dataString = " ";
-            omegaLegacy_dataString = "8:" + userID + "," + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + " ";
+            omicronLegacy_dataString = (int)ServiceType.MOCAP + ":" + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + "," + userID + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
         }
 
         public void SendKinectSpeech(int sourceID, int commandID, int systemID, double sourceAngle, double sourceAngleConfidence)
@@ -436,10 +438,10 @@ namespace TouchAPI_PQServer
             //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
             touchAPI_dataString = " ";
-            omegaLegacy_dataString = "7:" + sourceID + "," + commandID + "," + systemID + "," + sourceAngle + " ";
+            omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + commandID + "," + systemID + "," + sourceAngle + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
         }
 
         public void SendKinectSpeech(int sourceID, String speechText, double resultConfidence, double sourceAngle, double sourceAngleConfidence)
@@ -448,10 +450,10 @@ namespace TouchAPI_PQServer
             //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
             touchAPI_dataString = " ";
-            omegaLegacy_dataString = "7:" + sourceID + "," + speechText + "," + resultConfidence + "," + sourceAngle + "," + sourceAngleConfidence + " ";
+            omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + speechText + "," + resultConfidence + "," + sourceAngle + "," + sourceAngleConfidence + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omegaLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
         }
 
         public void SendGestureString(string gestureData)

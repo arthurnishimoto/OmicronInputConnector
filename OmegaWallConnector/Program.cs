@@ -28,8 +28,8 @@ namespace OmegaWallConnector
         [STAThread]
         static void Main()
         {
-            Console.WriteLine("TouchAPI Connector 1.0");
-            Console.WriteLine("Copyright (C) 2010 Electronic Visualization Laboratory\nUniversity of Illinois at Chicago");
+            Console.WriteLine("OmicronAPI Connector 1.0");
+            Console.WriteLine("Copyright (C) 2010-2012 Electronic Visualization Laboratory\nUniversity of Illinois at Chicago");
             Console.WriteLine("======================================================");
             Console.WriteLine("");
             Application.EnableVisualStyles();

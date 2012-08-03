@@ -68,17 +68,22 @@ namespace OmegaWallConnector
             voiceRecogCheckBox.Checked = kinectManager.IsVoiceInterfaceEnabled();
             kinectAudioDebugTextCheckBox.Checked = kinectManager.IsVoiceConsoleTextEnabled();
 
-            if (kinectManager.GetKinectElevation() <= 27 && kinectManager.GetKinectElevation() >= -27)
-            {
-                kinectElevationBar.Value = kinectManager.GetKinectElevation();
-                elevationLabel.Text = kinectManager.GetKinectElevation().ToString();
-            }
+            if( kinectSensorListBox.Items.Count > 0 )
+                kinectSensorListBox.SelectedIndex = 0;
+
+            //if (kinectManager.GetKinectElevation() <= 27 && kinectManager.GetKinectElevation() >= -27)
+            //{
+            //    kinectElevationBar.Value = kinectManager.GetKinectElevation();
+            //    elevationLabel.Text = kinectManager.GetKinectElevation().ToString();
+            //}
 
             thresholdBar.Value = touchManager.GetMoveThreshold();
             thresholdNumLabel.Text = touchManager.GetMoveThreshold().ToString();
 
             maxBlobSizeBar.Value = touchManager.GetMaxBlobSize();
             maxBlobSizeNumLabel.Text = touchManager.GetMaxBlobSize().ToString();
+
+            bool serverOnStartup = false; // Config state to start server on startup?
 
             // Read the config file
             try
@@ -87,7 +92,7 @@ namespace OmegaWallConnector
                 System.IO.StreamReader file = new System.IO.StreamReader("config.cfg");
                 bool readingServerList = false;
                 bool readingClientList = false;
-                bool serverOnStartup = false; // Config state to start server on startup?
+                
 
                 while ((line = file.ReadLine()) != null)
                 {
@@ -171,48 +176,49 @@ namespace OmegaWallConnector
                     }
                 }
 
-                // Set startup config settings
-                if (serverOnStartup){
-                    connectServerButton_Click(null, null);
-                }
-                pqGestureBox.Checked = touchManager.IsPQGesturesEnabled();
-                touchPointBox.Checked = touchManager.IsTouchPointsEnabled();
-
-                if (touchEnableBox.Checked)
-                {
-                    touchManager.InitAndConnectServer();
-                }
-
-                switch (omegaDesk.getOutputType() )
-                {
-                    case(TouchAPI_Server.OutputType.TacTile):
-                        tacTileRadioButton.Checked = true;
-                        break;
-                    case (TouchAPI_Server.OutputType.OmegaLib):
-                        oinputserverRadioButton.Checked = true;
-                        break;
-                    case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
-                        oinputLegacyRadioButton.Checked = true;
-                        break;
-                }
-
-                switch (kinectManager.GetSkeletonMode())
-                {
-                    case (KinectManager.SkeletonMode.Off):
-                        kinectSkeletonOffButton.Checked = true;
-                        break;
-                    case (KinectManager.SkeletonMode.Default):
-                        kinectSkeletonDefaultButton.Checked = true;
-                        break;
-                    case (KinectManager.SkeletonMode.Seated):
-                        kinectSkeletonSeatedButton.Checked = true;
-                        break;
-                }
-
             }
             catch (FileNotFoundException e)
             {
             }
+
+            // Set startup config settings
+            if (serverOnStartup)
+            {
+                connectServerButton_Click(null, null);
+            }
+            pqGestureBox.Checked = touchManager.IsPQGesturesEnabled();
+            touchPointBox.Checked = touchManager.IsTouchPointsEnabled();
+
+            if (touchEnableBox.Checked)
+            {
+                touchManager.InitAndConnectServer();
+            }
+
+            switch (omegaDesk.getOutputType())
+            {
+                case (TouchAPI_Server.OutputType.TacTile):
+                    tacTileRadioButton.Checked = true;
+                    break;
+                case (TouchAPI_Server.OutputType.Omicron):
+                    oinputserverRadioButton.Checked = true;
+                    break;
+                case (TouchAPI_Server.OutputType.Omicron_Legacy):
+                    oinputLegacyRadioButton.Checked = true;
+                    break;
+            }
+
+            //switch (kinectManager.GetSkeletonMode())
+            //{
+            //    case (KinectManager.SkeletonMode.Off):
+            //        kinectSkeletonOffButton.Checked = true;
+            //        break;
+            //    case (KinectManager.SkeletonMode.Default):
+            //        kinectSkeletonDefaultButton.Checked = true;
+            //        break;
+            //    case (KinectManager.SkeletonMode.Seated):
+            //        kinectSkeletonSeatedButton.Checked = true;
+            //        break;
+            //}
         }
 
         private void GUI_FormClosed(Object sender, FormClosedEventArgs e)
@@ -452,16 +458,24 @@ namespace OmegaWallConnector
 
         private void kinectElevationBar_ValueChanged(object sender, EventArgs e)
         {
-            kinectManager.SetKinectElevation(kinectElevationBar.Value);
+            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            {
+                kinectManager.SetKinectElevation(itemChecked.ToString(),kinectElevationBar.Value);
+            }
+           
             elevationLabel.Text = kinectElevationBar.Value.ToString();
         }
 
         private void kinectSkeletonDefaultButton_MouseClick(object sender, MouseEventArgs e)
         {
+            
             if (kinectSkeletonDefaultButton.Checked)
             {
                 Console.WriteLine("Kinect Skeleton Mode: Default");
-                kinectManager.SetSkeletonModeDefault();
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                {
+                    kinectManager.SetSkeletonModeDefault(itemChecked.ToString());
+                }
             }
         }
 
@@ -470,7 +484,10 @@ namespace OmegaWallConnector
             if (kinectSkeletonSeatedButton.Checked)
             {
                 Console.WriteLine("Kinect Skeleton Mode: Seated");
-                kinectManager.SetSkeletonModeSeated();
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                {
+                    kinectManager.SetSkeletonModeSeated(itemChecked.ToString());
+                }
             }
         }
 
@@ -479,7 +496,96 @@ namespace OmegaWallConnector
             if (kinectSkeletonOffButton.Checked)
             {
                 Console.WriteLine("Kinect Skeleton Mode: Off");
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                {
+                    kinectManager.SetSkeletonModeOff(itemChecked.ToString());
+                }
             }
+        }
+
+        public void updateKinectAngle(int angle)
+        {
+            kinectCurrentAngleLabel.Text = angle.ToString();
+        }
+
+        public void addKinectSensorToList(string kinectSensorID)
+        {
+            kinectSensorListBox.Items.Add(kinectSensorID);
+
+            if ( kinectManager != null && kinectSensorListBox.Items.Count == 1)
+                kinectSensorListBox.SelectedIndex = 0;
+        }
+
+        public void removeKinectSensorToList(string kinectSensorID)
+        {
+            kinectSensorListBox.Items.Remove(kinectSensorID);
+        }
+
+        private void kinectSensorListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Console.WriteLine("kinectSensorListBox_SelectedIndexChanged");
+
+            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            {
+                // Get the selected sensor's current elevation
+                kinectCurrentAngleLabel.Text = kinectManager.GetKinectElevation(itemChecked.ToString()).ToString();
+
+                // Get the selected sensor's depth image
+                kinectManager.SetDepthView(itemChecked.ToString());
+
+                //  Get the selected sensor's near mode
+                if (kinectManager.HasNearModeSupport(itemChecked.ToString()))
+                {
+                    kinectNearModeCheckBox.Enabled = true;
+                    kinectNearModeCheckBox.Checked = kinectManager.GetNearMode(itemChecked.ToString());
+                }
+                else
+                {
+                    kinectNearModeCheckBox.Enabled = false;
+                }
+
+                // Get the selected sensor's tracking mode
+                switch (kinectManager.GetSkeletonMode(itemChecked.ToString()))
+                {
+                    case (KinectManager.SkeletonMode.Off):
+                        kinectSkeletonDefaultButton.Enabled = true;
+                        kinectSkeletonSeatedButton.Enabled = true;
+                        kinectSkeletonOffButton.Checked = true;
+                        break;
+                    case (KinectManager.SkeletonMode.Default):
+                        kinectSkeletonDefaultButton.Enabled = true;
+                        kinectSkeletonSeatedButton.Enabled = true;
+                        kinectSkeletonDefaultButton.Checked = true;
+                        break;
+                    case (KinectManager.SkeletonMode.Seated):
+                        kinectSkeletonDefaultButton.Enabled = true;
+                        kinectSkeletonSeatedButton.Enabled = true;
+                        kinectSkeletonSeatedButton.Checked = true;
+                        break;
+                    default:
+                        kinectSkeletonOffButton.Checked = true;
+                        kinectSkeletonDefaultButton.Enabled = false;
+                        kinectSkeletonSeatedButton.Enabled = false;
+                        break;
+                }
+            }
+        }
+
+        private void kinectNearModeCheckBox_Click(object sender, EventArgs e)
+        {
+            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            {
+                if (kinectNearModeCheckBox.Checked)
+                {
+
+                    kinectManager.SetNearMode(itemChecked.ToString(), true);
+                }
+                else
+                {
+                    kinectManager.SetNearMode(itemChecked.ToString(), false);
+                }
+            }
+
         }
     }
     

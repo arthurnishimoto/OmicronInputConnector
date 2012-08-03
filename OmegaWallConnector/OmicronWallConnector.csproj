@@ -8,8 +8,8 @@
     <ProjectGuid>{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OmegaWallConnector</RootNamespace>
-    <AssemblyName>OmegaWallConnector</AssemblyName>
+    <RootNamespace>OmicronWallConnector</RootNamespace>
+    <AssemblyName>OmicronWallConnector</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
@@ -101,6 +101,12 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KinectGUI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="KinectGUI.Designer.cs">
+      <DependentUpon>KinectGUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImageViewer.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="GUI.cs">
@@ -125,6 +131,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TouchManager.cs" />
+    <EmbeddedResource Include="KinectGUI.resx">
+      <DependentUpon>KinectGUI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI.resx">
       <DependentUpon>GUI.cs</DependentUpon>
       <SubType>Designer</SubType>

@@ -32,7 +32,7 @@ namespace TouchAPI_PQServer
         private int dataPort;
         private UdpClient udpClient;
 
-        private TouchAPI_Server.OutputType dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
+        private TouchAPI_Server.OutputType dataFormat = TouchAPI_Server.OutputType.Omicron_Legacy;
 
         // Incoming data from the client.
         private static string data = null;
@@ -75,10 +75,10 @@ namespace TouchAPI_PQServer
                 udpClient.Connect(clientIP, dataPort);
                 active = true;
 
-                if (data.Contains("omega_legacy_data_on"))
+                if (data.Contains("omicron_legacy_data_on"))
                 {
-                    dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
-                    //Console.WriteLine("   " + clientAddress + " requested omegaLib legacy data sent on port " + dataPort);
+                    dataFormat = TouchAPI_Server.OutputType.Omicron_Legacy;
+                    //Console.WriteLine("   " + clientAddress + " requested Omicron legacy data sent on port " + dataPort);
                 }
                 else
                 {
@@ -113,8 +113,8 @@ namespace TouchAPI_PQServer
                 case (TouchAPI_Server.OutputType.TacTile):
                     dataFormat = TouchAPI_Server.OutputType.TacTile;
                     break;
-                case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
-                    dataFormat = TouchAPI_Server.OutputType.OmegaLib_Legacy;
+                case (TouchAPI_Server.OutputType.Omicron_Legacy):
+                    dataFormat = TouchAPI_Server.OutputType.Omicron_Legacy;
                     break;
             }
         }// CTOR
@@ -132,11 +132,11 @@ namespace TouchAPI_PQServer
                         case (TouchAPI_Server.OutputType.TacTile):
                             Console.WriteLine("    Requested data using TouchAPI (TacTile) format");
                             break;
-                        case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
-                            Console.WriteLine("    Requested data using OmegaLib Legacy format");
+                        case (TouchAPI_Server.OutputType.Omicron_Legacy):
+                            Console.WriteLine("    Requested data using Omicron Legacy format");
                             break;
-                        case (TouchAPI_Server.OutputType.OmegaLib):
-                            Console.WriteLine("    Requested data using OmegaLib format");
+                        case (TouchAPI_Server.OutputType.Omicron):
+                            Console.WriteLine("    Requested data using Omicron format");
                             break;
                     }
                 }
@@ -151,7 +151,7 @@ namespace TouchAPI_PQServer
             data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
             data = data.Trim();
             
-            Console.WriteLine(data);
+            //Console.WriteLine(data);
         }// process
 
         public void sendData(String touchAPI_dataString, String omegaLegacy_dataString)
@@ -162,7 +162,7 @@ namespace TouchAPI_PQServer
                 case(TouchAPI_Server.OutputType.TacTile):
                     dataString = touchAPI_dataString;
                     break;
-                case (TouchAPI_Server.OutputType.OmegaLib_Legacy):
+                case (TouchAPI_Server.OutputType.Omicron_Legacy):
                     dataString = omegaLegacy_dataString;
                     break;
                 default:
@@ -175,7 +175,7 @@ namespace TouchAPI_PQServer
                 //Console.WriteLine("Sending message '{0}' to {1}", dataString, clientAddress);
                 byte[] msg = Encoding.ASCII.GetBytes(dataString);
                 udpClient.Send(msg, msg.Length);
-
+                //Console.WriteLine(dataString);
                 if (!handler.Connected)
                 {
                     Console.WriteLine(clientAddress + " disconnected.");

@@ -74,11 +74,17 @@ namespace OmegaWallConnector
             this.label2 = new System.Windows.Forms.Label();
             this.messagePortBox = new System.Windows.Forms.ComboBox();
             this.kinectGroupBox1 = new System.Windows.Forms.GroupBox();
+            this.kinectNearModeCheckBox = new System.Windows.Forms.CheckBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.kinectSensorListBox = new System.Windows.Forms.ListBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.kinectSkeletonOffButton = new System.Windows.Forms.RadioButton();
             this.kinectSkeletonSeatedButton = new System.Windows.Forms.RadioButton();
             this.kinectSkeletonDefaultButton = new System.Windows.Forms.RadioButton();
             this.kinectTiltGroupBox = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.kinectCurrentAngleLabel = new System.Windows.Forms.Label();
             this.elevationLabel = new System.Windows.Forms.Label();
             this.kinectElevationBar = new System.Windows.Forms.TrackBar();
             this.kinectEnabledCheckBox = new System.Windows.Forms.CheckBox();
@@ -93,6 +99,7 @@ namespace OmegaWallConnector
             this.clientGroupBox.SuspendLayout();
             this.streamTypeGroupBox.SuspendLayout();
             this.kinectGroupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.kinectTiltGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.kinectElevationBar)).BeginInit();
@@ -324,10 +331,10 @@ namespace OmegaWallConnector
             this.oinputserverRadioButton.AutoSize = true;
             this.oinputserverRadioButton.Location = new System.Drawing.Point(6, 65);
             this.oinputserverRadioButton.Name = "oinputserverRadioButton";
-            this.oinputserverRadioButton.Size = new System.Drawing.Size(73, 17);
+            this.oinputserverRadioButton.Size = new System.Drawing.Size(64, 17);
             this.oinputserverRadioButton.TabIndex = 13;
             this.oinputserverRadioButton.TabStop = true;
-            this.oinputserverRadioButton.Text = "OmegaLib";
+            this.oinputserverRadioButton.Text = "Omicron";
             this.oinputserverRadioButton.UseVisualStyleBackColor = true;
             // 
             // oinputLegacyRadioButton
@@ -335,10 +342,10 @@ namespace OmegaWallConnector
             this.oinputLegacyRadioButton.AutoSize = true;
             this.oinputLegacyRadioButton.Location = new System.Drawing.Point(6, 42);
             this.oinputLegacyRadioButton.Name = "oinputLegacyRadioButton";
-            this.oinputLegacyRadioButton.Size = new System.Drawing.Size(111, 17);
+            this.oinputLegacyRadioButton.Size = new System.Drawing.Size(102, 17);
             this.oinputLegacyRadioButton.TabIndex = 12;
             this.oinputLegacyRadioButton.TabStop = true;
-            this.oinputLegacyRadioButton.Text = "Legacy OmegaLib";
+            this.oinputLegacyRadioButton.Text = "Legacy Omicron";
             this.oinputLegacyRadioButton.UseVisualStyleBackColor = true;
             // 
             // tacTileRadioButton
@@ -428,6 +435,8 @@ namespace OmegaWallConnector
             // 
             // kinectGroupBox1
             // 
+            this.kinectGroupBox1.Controls.Add(this.kinectNearModeCheckBox);
+            this.kinectGroupBox1.Controls.Add(this.groupBox2);
             this.kinectGroupBox1.Controls.Add(this.groupBox1);
             this.kinectGroupBox1.Controls.Add(this.kinectTiltGroupBox);
             this.kinectGroupBox1.Controls.Add(this.kinectEnabledCheckBox);
@@ -435,10 +444,41 @@ namespace OmegaWallConnector
             this.kinectGroupBox1.Controls.Add(this.kinectSkeletonTextCheckBox);
             this.kinectGroupBox1.Location = new System.Drawing.Point(425, 12);
             this.kinectGroupBox1.Name = "kinectGroupBox1";
-            this.kinectGroupBox1.Size = new System.Drawing.Size(429, 384);
+            this.kinectGroupBox1.Size = new System.Drawing.Size(448, 384);
             this.kinectGroupBox1.TabIndex = 5;
             this.kinectGroupBox1.TabStop = false;
             this.kinectGroupBox1.Text = "Kinect Skeleton Tracking";
+            // 
+            // kinectNearModeCheckBox
+            // 
+            this.kinectNearModeCheckBox.AutoSize = true;
+            this.kinectNearModeCheckBox.Location = new System.Drawing.Point(157, 18);
+            this.kinectNearModeCheckBox.Name = "kinectNearModeCheckBox";
+            this.kinectNearModeCheckBox.Size = new System.Drawing.Size(121, 17);
+            this.kinectNearModeCheckBox.TabIndex = 17;
+            this.kinectNearModeCheckBox.Text = "Near Mode Enabled";
+            this.kinectNearModeCheckBox.UseVisualStyleBackColor = true;
+            this.kinectNearModeCheckBox.Click += new System.EventHandler(this.kinectNearModeCheckBox_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.kinectSensorListBox);
+            this.groupBox2.Location = new System.Drawing.Point(132, 41);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(310, 95);
+            this.groupBox2.TabIndex = 16;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Selected Kinect Sensors";
+            // 
+            // kinectSensorListBox
+            // 
+            this.kinectSensorListBox.FormattingEnabled = true;
+            this.kinectSensorListBox.Location = new System.Drawing.Point(6, 18);
+            this.kinectSensorListBox.Name = "kinectSensorListBox";
+            this.kinectSensorListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.kinectSensorListBox.Size = new System.Drawing.Size(298, 69);
+            this.kinectSensorListBox.TabIndex = 18;
+            this.kinectSensorListBox.SelectedIndexChanged += new System.EventHandler(this.kinectSensorListBox_SelectedIndexChanged);
             // 
             // groupBox1
             // 
@@ -447,7 +487,7 @@ namespace OmegaWallConnector
             this.groupBox1.Controls.Add(this.kinectSkeletonDefaultButton);
             this.groupBox1.Location = new System.Drawing.Point(7, 41);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(140, 95);
+            this.groupBox1.Size = new System.Drawing.Size(119, 95);
             this.groupBox1.TabIndex = 14;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Skeleton Tracking";
@@ -490,19 +530,49 @@ namespace OmegaWallConnector
             // 
             // kinectTiltGroupBox
             // 
+            this.kinectTiltGroupBox.Controls.Add(this.label9);
+            this.kinectTiltGroupBox.Controls.Add(this.label8);
+            this.kinectTiltGroupBox.Controls.Add(this.kinectCurrentAngleLabel);
             this.kinectTiltGroupBox.Controls.Add(this.elevationLabel);
             this.kinectTiltGroupBox.Controls.Add(this.kinectElevationBar);
-            this.kinectTiltGroupBox.Location = new System.Drawing.Point(354, 142);
+            this.kinectTiltGroupBox.Location = new System.Drawing.Point(354, 135);
             this.kinectTiltGroupBox.Name = "kinectTiltGroupBox";
-            this.kinectTiltGroupBox.Size = new System.Drawing.Size(69, 233);
+            this.kinectTiltGroupBox.Size = new System.Drawing.Size(88, 240);
             this.kinectTiltGroupBox.TabIndex = 2;
             this.kinectTiltGroupBox.TabStop = false;
             this.kinectTiltGroupBox.Text = "Tilt Angle";
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 16);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(41, 13);
+            this.label9.TabIndex = 9;
+            this.label9.Text = "Current";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(37, 119);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(38, 13);
+            this.label8.TabIndex = 8;
+            this.label8.Text = "Target";
+            // 
+            // kinectCurrentAngleLabel
+            // 
+            this.kinectCurrentAngleLabel.AutoSize = true;
+            this.kinectCurrentAngleLabel.Location = new System.Drawing.Point(50, 16);
+            this.kinectCurrentAngleLabel.Name = "kinectCurrentAngleLabel";
+            this.kinectCurrentAngleLabel.Size = new System.Drawing.Size(13, 13);
+            this.kinectCurrentAngleLabel.TabIndex = 7;
+            this.kinectCurrentAngleLabel.Text = "0";
+            // 
             // elevationLabel
             // 
             this.elevationLabel.AutoSize = true;
-            this.elevationLabel.Location = new System.Drawing.Point(41, 122);
+            this.elevationLabel.Location = new System.Drawing.Point(50, 132);
             this.elevationLabel.Name = "elevationLabel";
             this.elevationLabel.Size = new System.Drawing.Size(13, 13);
             this.elevationLabel.TabIndex = 6;
@@ -510,12 +580,12 @@ namespace OmegaWallConnector
             // 
             // kinectElevationBar
             // 
-            this.kinectElevationBar.Location = new System.Drawing.Point(6, 19);
+            this.kinectElevationBar.Location = new System.Drawing.Point(6, 27);
             this.kinectElevationBar.Maximum = 27;
             this.kinectElevationBar.Minimum = -27;
             this.kinectElevationBar.Name = "kinectElevationBar";
             this.kinectElevationBar.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.kinectElevationBar.Size = new System.Drawing.Size(45, 215);
+            this.kinectElevationBar.Size = new System.Drawing.Size(45, 208);
             this.kinectElevationBar.TabIndex = 5;
             this.kinectElevationBar.ValueChanged += new System.EventHandler(this.kinectElevationBar_ValueChanged);
             // 
@@ -586,13 +656,13 @@ namespace OmegaWallConnector
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(866, 476);
+            this.ClientSize = new System.Drawing.Size(885, 476);
             this.Controls.Add(this.kinectGroupBox2);
             this.Controls.Add(this.clientGroupBox);
             this.Controls.Add(this.touchGroupBox);
             this.Controls.Add(this.kinectGroupBox1);
             this.Name = "GUI";
-            this.Text = "OmegaWallConnector";
+            this.Text = "OmicronWallConnector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);
             this.touchGroupBox.ResumeLayout(false);
             this.touchGroupBox.PerformLayout();
@@ -604,6 +674,7 @@ namespace OmegaWallConnector
             this.streamTypeGroupBox.PerformLayout();
             this.kinectGroupBox1.ResumeLayout(false);
             this.kinectGroupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.kinectTiltGroupBox.ResumeLayout(false);
@@ -662,5 +733,11 @@ namespace OmegaWallConnector
         private System.Windows.Forms.RadioButton kinectSkeletonOffButton;
         private System.Windows.Forms.RadioButton kinectSkeletonSeatedButton;
         private System.Windows.Forms.RadioButton kinectSkeletonDefaultButton;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label kinectCurrentAngleLabel;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.CheckBox kinectNearModeCheckBox;
+        private System.Windows.Forms.ListBox kinectSensorListBox;
     }
 }

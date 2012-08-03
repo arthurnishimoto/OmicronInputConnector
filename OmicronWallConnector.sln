@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmegaWallConnector", "OmegaWallConnector\OmegaWallConnector.csproj", "{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmicronWallConnector", "OmegaWallConnector\OmicronWallConnector.csproj", "{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

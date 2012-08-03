@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections; // Hashtable
 using System.Linq;
 using System.Text;
 
@@ -38,13 +39,12 @@ namespace OmegaWallConnector
 {
     class KinectManager
     {
-        public enum SkeletonMode { Off, Default, Seated };
+        public enum SkeletonMode { TooMany, Off, Default, Seated };
         public enum SkeletonChooser { Default, Closest1Player, Closest2Player, Sticky1Player, Sticky2Player, MostActive1Player, MostActive2Player };
 
         static SkeletonMode skeletonMode = SkeletonMode.Default;
 
-        // Kinect Sensor Interface (single Kinect use only - any use of this may break on multi-Kinect use)
-        static KinectSensor kinect; // Currently used for audio and elevation control
+        static Hashtable kinectTable; // List of all KinectSensor objects
 
         // ---- Elevation control ----
         public static Timer elevationTimer; // Timer used to limit sensor motor movement
@@ -53,13 +53,13 @@ namespace OmegaWallConnector
         static int timeSinceLastElevationChange;
         static Boolean updateElevation = false;
         static int newElevation;
+        static ArrayList newElevationKinectSensorList;
 
-        int connectedKinects = 0;
-
-        GUI gui;
+        static GUI gui;
 
         // ---- Skeleton Tracking ----
         // List of all skeletons (users) in current Kinect frame
+        private int enabledSkeletonStreams = 0;
         private Skeleton[] skeletonData;
 
         // ---- Image Displays ----
@@ -68,6 +68,7 @@ namespace OmegaWallConnector
         //private KinectSkeletonViewer KinectSkeletonViewerOnDepth;
 
         // ---- Audio Processing ----
+        private KinectSensor speechSensor; // At the moment, only the last connected kinect will do speech recognition
         private SpeechRecognitionEngine speechRecognizer;
         private Boolean voiceRecognitionEnabled = false;
         private Boolean voiceConsoleText = false;
@@ -80,6 +81,9 @@ namespace OmegaWallConnector
 
         public KinectManager(GUI p, TouchAPI_Server o)
         {
+            kinectTable = new Hashtable();
+            newElevationKinectSensorList = new ArrayList();
+
             //kinectColorViewer = new KinectColorViewer(p);
             kinectDepthViewer = new KinectDepthViewer(p);
 
@@ -102,7 +106,6 @@ namespace OmegaWallConnector
 
             elevationTimer.Interval = timerIncrement;
             elevationTimer.Enabled = true;
-
         }// CTOR
 
         // ------- Kinect Initializations ---------------------------------------------------------
@@ -112,7 +115,6 @@ namespace OmegaWallConnector
             KinectSensor.KinectSensors.StatusChanged += this.KinectsStatusChanged;
 
             // show status for each sensor that is found now.
-            connectedKinects = 0;
             foreach (KinectSensor kinect in KinectSensor.KinectSensors)
             {
                 this.ShowStatus(kinect, kinect.Status);
@@ -143,18 +145,24 @@ namespace OmegaWallConnector
             
             if (kinectStatus == KinectStatus.Connected)
             {
-                if (kinect == null)
-                    kinect = kinectSensor;
-                InitializeKinectServices(kinectSensor);
-                connectedKinects++;
+                if( !kinectTable.ContainsKey(kinectSensor.DeviceConnectionId) )
+                {
+                    InitializeKinectServices(kinectSensor);
 
-                gui.SetKinectEnabled(true);
+                    kinectTable.Add(kinectSensor.DeviceConnectionId, kinectSensor);
+                    gui.SetKinectEnabled(true);
+                    gui.addKinectSensorToList(kinectSensor.DeviceConnectionId);
+                    speechSensor = kinectSensor;
+                }
             }
             else if (kinectStatus == KinectStatus.Disconnected)
             {
-                connectedKinects--;
-
-                if( connectedKinects < 1 )
+                if (kinectTable.ContainsKey(kinectSensor.DeviceConnectionId))
+                {
+                    kinectTable.Remove(kinectSensor.DeviceConnectionId);
+                    gui.removeKinectSensorToList(kinectSensor.DeviceConnectionId);
+                }
+                if (kinectTable.Count == 0)
                     gui.SetKinectEnabled(false);
             }
         }
@@ -188,15 +196,19 @@ namespace OmegaWallConnector
 
             // ---- Skeleton Service ----
             sensor.SkeletonFrameReady += this.SkeletonsReady;
-            sensor.SkeletonStream.Enable(new TransformSmoothParameters()
-            {
-                Smoothing = 0.5f,
-                Correction = 0.5f,
-                Prediction = 0.5f,
-                JitterRadius = 0.05f,
-                MaxDeviationRadius = 0.04f
-            });
 
+            if (kinectTable.Count < 1)
+            {
+                enabledSkeletonStreams++;
+                sensor.SkeletonStream.Enable(new TransformSmoothParameters()
+                {
+                    Smoothing = 0.5f,
+                    Correction = 0.5f,
+                    Prediction = 0.5f,
+                    JitterRadius = 0.05f,
+                    MaxDeviationRadius = 0.04f
+                });
+            }
             // ---- Audio Services ----
             speechRecognizer = this.CreateSpeechRecognizer();
 
@@ -246,44 +258,154 @@ namespace OmegaWallConnector
             {
                 Console.WriteLine("Kinect elevation changed to {0}", newElevation);
                 updateElevation = false;
-                kinect.ElevationAngle = newElevation;
+
+                foreach (String kinectSensorID in newElevationKinectSensorList )
+                {
+                    KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+                    if( kinect != null )
+                        kinect.ElevationAngle = newElevation;
+                }
+                newElevationKinectSensorList.Clear();
             }
-            
+
         }
 
-        public int GetKinectElevation()
+        public int GetKinectElevation(String kinectSensorID)
         {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+
             if (kinect != null)
+            {
                 return kinect.ElevationAngle;
-            else
-                return 0;
+            }
+            return 0;
         }
 
-        public void SetKinectElevation(int angle)
+        public void SetKinectElevation(String kinectSensorID, int angle)
         {
-            if (kinect != null)
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+
+            if (kinect != null )
             {
                 timeSinceLastElevationChange = 0;
                 updateElevation = true;
                 newElevation = angle;
+
+                if( !newElevationKinectSensorList.Contains(kinectSensorID) )
+                    newElevationKinectSensorList.Add(kinectSensorID);
             }
         }
 
-        public void SetSkeletonModeDefault()
+        public void SetSkeletonModeDefault(String kinectSensorID)
         {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+
             if (kinect != null)
+            {
                 kinect.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                if (!kinect.SkeletonStream.IsEnabled && enabledSkeletonStreams == 0)
+                {
+                    kinect.SkeletonStream.Enable();
+                    enabledSkeletonStreams++;
+                }
+            }
         }
 
-        public void SetSkeletonModeSeated()
+        public void SetSkeletonModeSeated(String kinectSensorID)
         {
-            if (kinect != null)
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null && enabledSkeletonStreams == 0 )
+            {
                 kinect.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                if (!kinect.SkeletonStream.IsEnabled)
+                {
+                    kinect.SkeletonStream.Enable();
+                    enabledSkeletonStreams++;
+                }
+            }
         }
 
-        public SkeletonMode GetSkeletonMode()
+        public void SetSkeletonModeOff(String kinectSensorID)
         {
-            return skeletonMode;
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null)
+            {
+                kinect.SkeletonStream.Disable();
+                enabledSkeletonStreams--;
+            }
+        }
+
+        public SkeletonMode GetSkeletonMode(String kinectSensorID)
+        {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null)
+            {
+                if (!kinect.SkeletonStream.IsEnabled && enabledSkeletonStreams > 0)
+                    return SkeletonMode.TooMany;
+
+                if (kinect.SkeletonStream.IsEnabled && kinect.SkeletonStream.TrackingMode == SkeletonTrackingMode.Seated)
+                    return SkeletonMode.Seated;
+                else if (kinect.SkeletonStream.IsEnabled && kinect.SkeletonStream.TrackingMode == SkeletonTrackingMode.Default)
+                    return SkeletonMode.Default;
+            }
+            return SkeletonMode.Off;
+        }
+
+        public void SetNearMode(String kinectSensorID, Boolean value)
+        {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null)
+            {
+                kinect.SkeletonStream.EnableTrackingInNearRange = value;
+
+                try
+                {
+                    if (value)
+                        kinect.DepthStream.Range = DepthRange.Near;
+                    else
+                        kinect.DepthStream.Range = DepthRange.Default;
+                }
+                catch (InvalidOperationException)
+                {
+                    kinect.DepthStream.Range = DepthRange.Default;
+                }
+            }
+        }
+
+        public bool GetNearMode(String kinectSensorID)
+        {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null)
+            {
+                return kinect.SkeletonStream.EnableTrackingInNearRange;
+            }
+            return false;
+        }
+
+        public bool HasNearModeSupport(String kinectSensorID)
+        {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            try
+            {
+                kinect.DepthStream.Range = DepthRange.Near;
+                kinect.DepthStream.Range = DepthRange.Default;
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                kinect.DepthStream.Range = DepthRange.Default;
+            }
+            return false;
+        }
+
+        public void SetDepthView(String kinectSensorID)
+        {
+            KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
+            if (kinect != null)
+            {
+                kinectDepthViewer.Kinect = kinect;
+            }
+           
         }
 
         // Kinect enabled apps should uninitialize all Kinect services that were initialized in InitializeKinectServices() here.
@@ -292,6 +414,8 @@ namespace OmegaWallConnector
             sensor.Stop();
 
             sensor.SkeletonFrameReady -= this.SkeletonsReady;
+            kinectTable.Remove(sensor.DeviceConnectionId);
+            gui.removeKinectSensorToList(sensor.DeviceConnectionId);
 
             kinectDepthViewer.Kinect = null;
             //KinectSkeletonViewerOnDepth.Kinect = null;
@@ -356,31 +480,37 @@ namespace OmegaWallConnector
                             AnkleRight = 18,
                             FootRight = 19,
                              * */
+
+                            // Seated mode
                             SendKinectData(skeleton.TrackingId, JointType.Head, skeleton.Joints[JointType.Head].Position);
-                            //SendKinectDataLegacyOIS(JointType.ShoulderCenter, skeleton.Joints[JointType.ShoulderCenter].Position);
-                            
-                            //SendKinectDataLegacyOIS(JointType.ShoulderLeft, skeleton.Joints[JointType.ShoulderLeft].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.ShoulderCenter, skeleton.Joints[JointType.ShoulderCenter].Position);
+
+                            SendKinectData(skeleton.TrackingId, JointType.ShoulderLeft, skeleton.Joints[JointType.ShoulderLeft].Position);
                             SendKinectData(skeleton.TrackingId, JointType.ElbowLeft, skeleton.Joints[JointType.ElbowLeft].Position);
-                            //SendKinectDataLegacyOIS(JointType.WristLeft, skeleton.Joints[JointType.WristLeft].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.WristLeft, skeleton.Joints[JointType.WristLeft].Position);
                             SendKinectData(skeleton.TrackingId, JointType.HandLeft, skeleton.Joints[JointType.HandLeft].Position);
 
-                            //SendKinectDataLegacyOIS(JointType.ShoulderRight, skeleton.Joints[JointType.ShoulderRight].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.ShoulderRight, skeleton.Joints[JointType.ShoulderRight].Position);
                             SendKinectData(skeleton.TrackingId, JointType.ElbowRight, skeleton.Joints[JointType.ElbowRight].Position);
-                            //SendKinectDataLegacyOIS(JointType.WristRight, skeleton.Joints[JointType.WristRight].Position);
+                            SendKinectData(skeleton.TrackingId, JointType.WristRight, skeleton.Joints[JointType.WristRight].Position);
                             SendKinectData(skeleton.TrackingId, JointType.HandRight, skeleton.Joints[JointType.HandRight].Position);
 
-                            SendKinectData(skeleton.TrackingId, JointType.HipCenter, skeleton.Joints[JointType.HipCenter].Position);
+                            // Default
+                            //if (kinect.SkeletonStream.TrackingMode != SkeletonTrackingMode.Seated)
+                            //{
+                            //    SendKinectData(skeleton.TrackingId, JointType.Spine, skeleton.Joints[JointType.Spine].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.HipCenter, skeleton.Joints[JointType.HipCenter].Position);
 
-                            //SendKinectDataLegacyOIS(JointType.HipLeft, skeleton.Joints[JointType.HipLeft].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.KneeLeft, skeleton.Joints[JointType.KneeLeft].Position);
-                            //SendKinectDataLegacyOIS(JointType.AnkleLeft, skeleton.Joints[JointType.AnkleLeft].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.FootLeft, skeleton.Joints[JointType.FootLeft].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.HipLeft, skeleton.Joints[JointType.HipLeft].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.KneeLeft, skeleton.Joints[JointType.KneeLeft].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.AnkleLeft, skeleton.Joints[JointType.AnkleLeft].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.FootLeft, skeleton.Joints[JointType.FootLeft].Position);
 
-                            //SendKinectDataLegacyOIS(JointType.HipRight, skeleton.Joints[JointType.HipRight].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.KneeRight, skeleton.Joints[JointType.KneeRight].Position);
-                            //SendKinectDataLegacyOIS(JointType.AnkleRight, skeleton.Joints[JointType.AnkleRight].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.FootRight, skeleton.Joints[JointType.FootRight].Position);
-
+                            //    SendKinectData(skeleton.TrackingId, JointType.HipRight, skeleton.Joints[JointType.HipRight].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.KneeRight, skeleton.Joints[JointType.KneeRight].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.AnkleRight, skeleton.Joints[JointType.AnkleRight].Position);
+                            //    SendKinectData(skeleton.TrackingId, JointType.FootRight, skeleton.Joints[JointType.FootRight].Position);
+                            //}
                         }
 
                         skeletonSlot++;
@@ -633,8 +763,8 @@ namespace OmegaWallConnector
         {
             string status = "Recognized: " + e.Result.Text + " " + e.Result.Confidence;
 
-            double sourceAngle = kinect.AudioSource.SoundSourceAngle;
-            double sourceAngleConfidence = kinect.AudioSource.SoundSourceAngleConfidence;
+            double sourceAngle = speechSensor.AudioSource.SoundSourceAngle;
+            double sourceAngleConfidence = speechSensor.AudioSource.SoundSourceAngleConfidence;
 
             server.SendKinectSpeech(-1, e.Result.Text, e.Result.Confidence, sourceAngle, sourceAngleConfidence);
 
