@@ -385,9 +385,12 @@ namespace OmegaWallConnector
         private void removeClientButton_Click(object sender, EventArgs e)
         {
             String clientInfo = (String)clientListBox.SelectedItem; // Should be in IP_Address:dataPort format i.e. 127.0.0.1:7000
-            String clientAddress = clientInfo.Substring(0, clientInfo.IndexOf(':'));
-            int clientPort = Convert.ToInt16(clientInfo.Substring(clientInfo.IndexOf(':') + 1, (clientInfo.Length - 1 - clientAddress.Length)));
-            omegaDesk.removeClient(clientAddress, clientPort);
+            if (clientInfo != null)
+            {
+                String clientAddress = clientInfo.Substring(0, clientInfo.IndexOf(':'));
+                int clientPort = Convert.ToInt16(clientInfo.Substring(clientInfo.IndexOf(':') + 1, (clientInfo.Length - 1 - clientAddress.Length)));
+                omegaDesk.removeClient(clientAddress, clientPort);
+            }
         }
 
         private void voiceRecogCheckBox_Click(object sender, EventArgs e)

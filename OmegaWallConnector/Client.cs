@@ -80,6 +80,11 @@ namespace TouchAPI_PQServer
                     dataFormat = TouchAPI_Server.OutputType.Omicron_Legacy;
                     //Console.WriteLine("   " + clientAddress + " requested Omicron legacy data sent on port " + dataPort);
                 }
+                else if (data.Contains("omicron_data_on"))
+                {
+                    dataFormat = TouchAPI_Server.OutputType.Omicron;
+                    //Console.WriteLine("   " + clientAddress + " requested Omicron data sent on port " + dataPort);
+                }
                 else
                 {
                     dataFormat = TouchAPI_Server.OutputType.TacTile;
@@ -115,6 +120,9 @@ namespace TouchAPI_PQServer
                     break;
                 case (TouchAPI_Server.OutputType.Omicron_Legacy):
                     dataFormat = TouchAPI_Server.OutputType.Omicron_Legacy;
+                    break;
+                case (TouchAPI_Server.OutputType.Omicron):
+                    dataFormat = TouchAPI_Server.OutputType.Omicron;
                     break;
             }
         }// CTOR
@@ -154,7 +162,7 @@ namespace TouchAPI_PQServer
             //Console.WriteLine(data);
         }// process
 
-        public void sendData(String touchAPI_dataString, String omegaLegacy_dataString)
+        public void sendData(String touchAPI_dataString, String omegaLegacy_dataString, Byte[] omicronData)
         {
             String dataString;
             switch (dataFormat)
@@ -173,7 +181,12 @@ namespace TouchAPI_PQServer
             {
                 // Sends data string to TouchAPI data port
                 //Console.WriteLine("Sending message '{0}' to {1}", dataString, clientAddress);
-                byte[] msg = Encoding.ASCII.GetBytes(dataString);
+                byte[] msg;
+                if (dataFormat == TouchAPI_Server.OutputType.Omicron)
+                    msg = omicronData;
+                else
+                    msg = Encoding.ASCII.GetBytes(dataString);
+
                 udpClient.Send(msg, msg.Length);
                 //Console.WriteLine(dataString);
                 if (!handler.Connected)

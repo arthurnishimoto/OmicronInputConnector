@@ -34,6 +34,7 @@ using Microsoft.Speech.Recognition;
 
 using TouchAPI_PQServer;
 using System.Timers;
+using omicron;
 
 namespace OmegaWallConnector
 {
@@ -457,71 +458,121 @@ namespace OmegaWallConnector
                         // Check if the skeleton is currently tracked
                         if (SkeletonTrackingState.Tracked == skeleton.TrackingState)
                         {
-                            /*
-                             * JointType Enum
-                            HipCenter = 0,
-                            Spine = 1,
-                            ShoulderCenter = 2,
-                            Head = 3,
-                            ShoulderLeft = 4,
-                            ElbowLeft = 5,
-                            WristLeft = 6,
-                            HandLeft = 7,
-                            ShoulderRight = 8,
-                            ElbowRight = 9,
-                            WristRight = 10,
-                            HandRight = 11,
-                            HipLeft = 12,
-                            KneeLeft = 13,
-                            AnkleLeft = 14,
-                            FootLeft = 15,
-                            HipRight = 16,
-                            KneeRight = 17,
-                            AnkleRight = 18,
-                            FootRight = 19,
-                             * */
+                            DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
+                            long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
-                            // Seated mode
-                            SendKinectData(skeleton.TrackingId, JointType.Head, skeleton.Joints[JointType.Head].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.ShoulderCenter, skeleton.Joints[JointType.ShoulderCenter].Position);
+                            // Omicron (binary) data
+                            MemoryStream ms = new MemoryStream();
+                            BinaryWriter writer = new BinaryWriter(ms);
+                            writer.Write((UInt32)timeStamp);     // Timestamp
+                            writer.Write((UInt32)skeleton.TrackingId);    // sourceID
+                            writer.Write((UInt32)0);    // serviceID
+                            writer.Write((UInt32)EventBase.ServiceType.ServiceTypeMocap);    // serviceType
+                            writer.Write((UInt32)EventBase.Type.Update);    // type
+                            writer.Write((UInt32)0);    // flags
 
-                            SendKinectData(skeleton.TrackingId, JointType.ShoulderLeft, skeleton.Joints[JointType.ShoulderLeft].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.ElbowLeft, skeleton.Joints[JointType.ElbowLeft].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.WristLeft, skeleton.Joints[JointType.WristLeft].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.HandLeft, skeleton.Joints[JointType.HandLeft].Position);
+                            // Head pos
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.X);    // posx
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.Y);    // posy
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.Z);    // posz
+                            writer.Write((Single)0);    // orx
+                            writer.Write((Single)0);    // ory
+                            writer.Write((Single)0);    // orz
+                            writer.Write((Single)0);    // orw
 
-                            SendKinectData(skeleton.TrackingId, JointType.ShoulderRight, skeleton.Joints[JointType.ShoulderRight].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.ElbowRight, skeleton.Joints[JointType.ElbowRight].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.WristRight, skeleton.Joints[JointType.WristRight].Position);
-                            SendKinectData(skeleton.TrackingId, JointType.HandRight, skeleton.Joints[JointType.HandRight].Position);
+                            writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataVector3Array);    // extraDataType
+                            writer.Write((UInt32)18);    // extraDataItems
+                            writer.Write((UInt32)0);    // extraDataMask
 
-                            // Default
-                            //if (kinect.SkeletonStream.TrackingMode != SkeletonTrackingMode.Seated)
-                            //{
-                            //    SendKinectData(skeleton.TrackingId, JointType.Spine, skeleton.Joints[JointType.Spine].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.HipCenter, skeleton.Joints[JointType.HipCenter].Position);
+                            // Extra data
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Z);
 
-                            //    SendKinectData(skeleton.TrackingId, JointType.HipLeft, skeleton.Joints[JointType.HipLeft].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.KneeLeft, skeleton.Joints[JointType.KneeLeft].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.AnkleLeft, skeleton.Joints[JointType.AnkleLeft].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.FootLeft, skeleton.Joints[JointType.FootLeft].Position);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Z);
 
-                            //    SendKinectData(skeleton.TrackingId, JointType.HipRight, skeleton.Joints[JointType.HipRight].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.KneeRight, skeleton.Joints[JointType.KneeRight].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.AnkleRight, skeleton.Joints[JointType.AnkleRight].Position);
-                            //    SendKinectData(skeleton.TrackingId, JointType.FootRight, skeleton.Joints[JointType.FootRight].Position);
-                            //}
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.Head].Position.Z);
+
+                            // Extra data - Upper body left
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.Z);
+
+                            // Extra data - Upper body right
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Z);
+
+                            // Extra data - lower body left
+                            writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.Z);
+
+                            // Extra data - lower body right
+                            writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.Z);
+
+                            writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.Z);
+
+                            Byte[] omicronData = ms.GetBuffer();
+                            server.SendKinectEvent(omicronData);
                         }
 
                         skeletonSlot++;
                     }
                 }
             }
-        }
-
-        void SendKinectData(int userID, JointType jointType, SkeletonPoint skeletonPoint)
-        {
-            server.SendMocapData(userID, (int)jointType, skeletonPoint.X, skeletonPoint.Y, skeletonPoint.Z, 0, 0, 0, 0);
         }
 
         // ---- General Kinect Audio Setup  -----------------------------------------------------------------------
@@ -572,7 +623,7 @@ namespace OmegaWallConnector
             Center
         }
 
-        public enum System
+        public enum SystemType
         {
             None = 0,
             SAGE,
@@ -587,19 +638,19 @@ namespace OmegaWallConnector
         struct WhatSaid
         {
             public Command command;
-            public System system;
+            public SystemType system;
         }
 
         static Dictionary<string, WhatSaid> SystemPhrases = new Dictionary<string, WhatSaid>()
         {
-            {"SAGE", new WhatSaid()      {system = System.SAGE}},
-            {"SAGE Next", new WhatSaid()      {system = System.SAGENext}},
-            {"Touch", new WhatSaid()      {system = System.Touch}},
-            {"Wall", new WhatSaid()      {system = System.Touch}},
-            {"Screen", new WhatSaid()      {system = System.Screen}},
-            {"Voice Interface", new WhatSaid()      {system = System.Voice}},
-            {"Motion Tracking", new WhatSaid()      {system = System.Mocap}},
-            {"Computer", new WhatSaid()      {system = System.Computer}},
+            {"SAGE", new WhatSaid()      {system = SystemType.SAGE}},
+            {"SAGE Next", new WhatSaid()      {system = SystemType.SAGENext}},
+            {"Touch", new WhatSaid()      {system = SystemType.Touch}},
+            {"Wall", new WhatSaid()      {system = SystemType.Touch}},
+            {"Screen", new WhatSaid()      {system = SystemType.Screen}},
+            {"Voice Interface", new WhatSaid()      {system = SystemType.Voice}},
+            {"Motion Tracking", new WhatSaid()      {system = SystemType.Mocap}},
+            {"Computer", new WhatSaid()      {system = SystemType.Computer}},
         };
 
         static Dictionary<string, WhatSaid> CommandPhrases = new Dictionary<string, WhatSaid>()
@@ -807,7 +858,7 @@ namespace OmegaWallConnector
                 // ---- Enable/Disable Voice Recognition ----
                 if (foundSystem && foundCommand && voiceRecognitionEnabled)
                 {
-                    if (said.system == System.Voice && said.command == Command.Disable)
+                    if (said.system == SystemType.Voice && said.command == Command.Disable)
                     {
                         DisableVoiceInterface();
                     }
@@ -819,13 +870,13 @@ namespace OmegaWallConnector
                 }
                 else if (foundSystem && foundCommand)
                 {
-                    if (said.system == System.Voice && said.command == Command.Enable)
+                    if (said.system == SystemType.Voice && said.command == Command.Enable)
                     {
                         EnableVoiceInterface();
                     }
                 }
 
-                if (said.system != System.None && said.command != Command.None)
+                if (said.system != SystemType.None && said.command != Command.None)
                 {
                     if (voiceConsoleText)
                         Console.WriteLine("\nRunning Command \t'{1}' on \t{0}", said.system, said.command);

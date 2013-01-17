@@ -27,7 +27,9 @@ using OmegaWallConnector;
 // Binary packet
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
+using omicron;
 namespace TouchAPI_PQServer
 {
     public enum ServiceType { POINTER, MOCAP, KEYBOARD, CONTROLLER, UI, GENERIC, BRAIN, WAND, AUDIO, SPEECH, KINECT };
@@ -349,7 +351,7 @@ namespace TouchAPI_PQServer
             parent.updateClientList(getClientList());
         }// removeClient
 
-        private void sendToClients(String touchAPI_data, String OmicronLegacy_data)
+        private void sendToClients(String touchAPI_data, String OmicronLegacy_data, Byte[] omicronData)
         {
             clientLock.WaitOne();
             doneClients.Clear();
@@ -357,7 +359,7 @@ namespace TouchAPI_PQServer
             {
                 if (client.isActive())
                 {
-                    client.sendData(touchAPI_data, OmicronLegacy_data);
+                    client.sendData(touchAPI_data, OmicronLegacy_data, omicronData);
                 }
                 else if (!client.isActive()) // Check for inactive clients
                 {
@@ -387,8 +389,34 @@ namespace TouchAPI_PQServer
             touchAPI_dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
             omicronLegacy_dataString = (int)ServiceType.POINTER + ":-1," + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + "," + intensity + " ";
 
+            // Omicron (binary) data
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.Write((UInt32)timeStamp);     // Timestamp
+            writer.Write((UInt32)touchID);    // sourceID
+            writer.Write((UInt32)0);    // serviceID
+            writer.Write((UInt32)EventBase.ServiceType.ServiceTypePointer);    // serviceType
+            writer.Write((UInt32)EventBase.Type.Update);    // type
+            writer.Write((UInt32)0);    // flags
+
+            writer.Write((Single)xPosRatio);    // posx
+            writer.Write((Single)yPosRatio);    // posy
+            writer.Write((Single)0);    // posz
+            writer.Write((Single)0);    // orx
+            writer.Write((Single)0);    // ory
+            writer.Write((Single)0);    // orz
+            writer.Write((Single)0);    // orw
+
+            writer.Write((UInt32)0);    // extraDataType
+            writer.Write((UInt32)0);    // extraDataItems
+            writer.Write((UInt32)0);    // extraDataMask
+
+            writer.Write((Byte)0);    // extraData
+
+            Byte[] omicronData = ms.GetBuffer();
+
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);
         }
 
         public void SendTouchData(int touchID, float xPosRatio, float yPosRatio, float intensity, float xWidth, float yWidth, int gesture)
@@ -402,34 +430,55 @@ namespace TouchAPI_PQServer
             // Map PQLabs gesture IDs to Omicron
             switch (gesture)
             {
-                case (1): gesture = 4; break; // move
-                case (0): gesture = 5; break; // down
-                case (2): gesture = 6; break; // up
+                case (1): gesture = (int)EventBase.Type.Move; break; // 4
+                case (0): gesture = (int)EventBase.Type.Down; break; // 5
+                case (2): gesture = (int)EventBase.Type.Up; break; // 6
             }
             // Flip y position for Omicron format (Flips y by default for TouchAPI)
             yPosRatio = 1.0f - yPosRatio;
 
             omicronLegacy_dataString = (int)ServiceType.POINTER + ":" + gesture + "," + touchID + "," + xPosRatio + "," + yPosRatio + "," + xWidth + "," + yWidth + " ";
 
+            // Omicron (binary) data
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.Write((UInt32)timeStamp);     // Timestamp
+            writer.Write((UInt32)touchID);    // sourceID
+            writer.Write((UInt32)0);    // serviceID
+            writer.Write((UInt32)EventBase.ServiceType.ServiceTypePointer);    // serviceType
+            writer.Write((UInt32)gesture);    // type
+            writer.Write((UInt32)0);    // flags
+
+            writer.Write((Single)xPosRatio);    // posx
+            writer.Write((Single)yPosRatio);    // posy
+            writer.Write((Single)0);    // posz
+            writer.Write((Single)0);    // orx
+            writer.Write((Single)0);    // ory
+            writer.Write((Single)0);    // orz
+            writer.Write((Single)0);    // orw
+
+            writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataFloatArray);    // extraDataType
+            writer.Write((UInt32)2);    // extraDataItems
+            writer.Write((UInt32)0);    // extraDataMask
+
+            // Extra data
+            //MemoryStream ed = new MemoryStream();
+            //BinaryWriter extraDataWriter = new BinaryWriter(ed);
+            writer.Write((Single)xWidth);    // xWidth
+            writer.Write((Single)yWidth);    // yWidth
+
+            //writer.Write(ed.GetBuffer());    // extraData
+
+            Byte[] omicronData = ms.GetBuffer();
+
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);
         }
 
-        public void SendMocapData(int userID, int jointID, float xPos, float yPos, float zPos, float xQuat, float yQuat, float zQuat, float wQuat)
+        public void SendKinectEvent(byte[] omicronData)
         {
-            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
-            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
-
-            // Omicron/Omicron typically only has one ID paraemeter followed by 3 position and 4 orientation.
-            // This is modified to handle an additional ID parameter to distinguish user and joint IDs.
-            // original: 'mocap:id,xPos,yPos,zPos,xQuat,yQuat,zQuat,wQuat '
-            // new: 'mocap:id,xPos,yPos,zPos,xQuat,yQuat,zQuat,wQuat,userID '
-
-            touchAPI_dataString = " ";
-            omicronLegacy_dataString = (int)ServiceType.MOCAP + ":" + jointID + "," + xPos + "," + yPos + "," + zPos + "," + xQuat + "," + yQuat + "," + zQuat + "," + wQuat + "," + userID + " ";
-
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);
         }
 
         public void SendKinectSpeech(int sourceID, int commandID, int systemID, double sourceAngle, double sourceAngleConfidence)
@@ -441,7 +490,7 @@ namespace TouchAPI_PQServer
             omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + commandID + "," + systemID + "," + sourceAngle + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString, null);
         }
 
         public void SendKinectSpeech(int sourceID, String speechText, double resultConfidence, double sourceAngle, double sourceAngleConfidence)
@@ -453,7 +502,7 @@ namespace TouchAPI_PQServer
             omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + speechText + "," + resultConfidence + "," + sourceAngle + "," + sourceAngleConfidence + " ";
 
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString);
+            sendToClients(touchAPI_dataString, omicronLegacy_dataString, null);
         }
 
         public void SendGestureString(string gestureData)

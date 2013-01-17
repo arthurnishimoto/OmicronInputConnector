@@ -51,7 +51,7 @@ namespace OmegaWallConnector
         static int screenWidth = -1;
         static int screenHeight = -1;
 
-        static string touchServer_ip = "131.193.77.116"; // OmegaTable "131.193.77.102" Tera5 "131.193.77.116"
+        static string touchServer_ip = "127.0.0.1";
         static Boolean serverConnected = false;
 
         static Boolean useTouchPoints = true;
