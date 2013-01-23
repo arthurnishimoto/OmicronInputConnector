@@ -92,7 +92,7 @@ namespace OmegaWallConnector
                 System.IO.StreamReader file = new System.IO.StreamReader("config.cfg");
                 bool readingServerList = false;
                 bool readingClientList = false;
-                
+                bool readingKinectSpeechList = false;
 
                 while ((line = file.ReadLine()) != null)
                 {
@@ -157,10 +157,16 @@ namespace OmegaWallConnector
                             readingClientList = true;
                             continue;
                         }
+                        else if (line.Contains("SPEECH_CHOICES"))
+                        {
+                            readingKinectSpeechList = true;
+                            continue;
+                        }
                         else if (line.Contains("}"))
                         {
                             readingServerList = false;
                             readingClientList = false;
+                            readingKinectSpeechList = false;
                         }
                         if (readingServerList && !line.Contains("{") && !line.Contains("}"))
                         {
@@ -172,7 +178,10 @@ namespace OmegaWallConnector
                             touchClientList.Items.Add(line);
                             touchClientList.Text = line;
                         }
-                        
+                        if (readingKinectSpeechList && !line.Contains("{") && !line.Contains("}"))
+                        {
+                            kinectManager.AddSpeechGrammarChoice(line);
+                        }
                     }
                 }
 
@@ -206,6 +215,13 @@ namespace OmegaWallConnector
                     oinputLegacyRadioButton.Checked = true;
                     break;
             }
+
+
+            // Update speech grammar and refresh GUI list
+            kinectManager.GenerateNewSpeechGrammar();
+            speechGrammarListBox.Items.Clear();
+            foreach( String s in kinectManager.speechChoiceList )
+                speechGrammarListBox.Items.Add(s);
 
             //switch (kinectManager.GetSkeletonMode())
             //{
@@ -589,6 +605,39 @@ namespace OmegaWallConnector
                 }
             }
 
+        }
+
+        private void updateGrammarButton_Click(object sender, EventArgs e)
+        {
+            if (newSpeechChoiceTextBox.TextLength > 0)
+            {
+                kinectManager.AddSpeechGrammarChoice(newSpeechChoiceTextBox.Text);
+                newSpeechChoiceTextBox.Text = "";
+            }
+
+            // Update grammar
+            kinectManager.GenerateNewSpeechGrammar();
+
+            // Refresh GUI list
+            speechGrammarListBox.Items.Clear();
+            foreach( String s in kinectManager.speechChoiceList )
+                speechGrammarListBox.Items.Add(s);
+        }
+
+        private void removeGrammarChoiceButton_Click(object sender, EventArgs e)
+        {
+            foreach (String s in speechGrammarListBox.SelectedItems)
+            {
+                kinectManager.RemoveSpeechGrammarChoice(s);
+            }
+
+            // Update grammar
+            kinectManager.GenerateNewSpeechGrammar();
+
+            // Refresh GUI list
+            speechGrammarListBox.Items.Clear();
+            foreach (String s in kinectManager.speechChoiceList)
+                speechGrammarListBox.Items.Add(s);
         }
     }
     

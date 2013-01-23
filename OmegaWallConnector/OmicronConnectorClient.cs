@@ -108,7 +108,7 @@ namespace omicron
             ServiceTypeGeneric,
             ServiceTypeBrain,
             ServiceTypeWand,
-            ServiceTypeAudio
+            ServiceTypeSpeech
         };
 
         //! #PYAPI Supported event types.
@@ -252,7 +252,8 @@ namespace omicron
             ExtraDataFloatArray,
             ExtraDataIntArray,
             ExtraDataVector3Array,
-            ExtraDataString
+            ExtraDataString,
+            ExtraDataKinectSpeech
         };
 
         //! Joint enumerations for Kinect (Uses OpenNI's enumerations with additional Kinect for Windows values)

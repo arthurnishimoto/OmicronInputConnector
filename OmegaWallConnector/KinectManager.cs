@@ -29,6 +29,7 @@ using Microsoft.Kinect;
 // Needed to grab dll Reference from:
 // C:\Windows\assembly\GAC_MSIL\Microsoft.Speech\11.0.0.0__31bf3856ad364e35\Microsoft.Speech.dll
 // I assume this was loaded with the Kinect 1.0 SDK
+using Microsoft.Speech;
 using Microsoft.Speech.AudioFormat;
 using Microsoft.Speech.Recognition;
 
@@ -73,6 +74,10 @@ namespace OmegaWallConnector
         private SpeechRecognitionEngine speechRecognizer;
         private Boolean voiceRecognitionEnabled = false;
         private Boolean voiceConsoleText = false;
+        private Choices commandControlChoices;
+        public ArrayList speechChoiceList = new ArrayList(); // String representation of grammar list
+        private Choices speechChoices; // List speech grammar will be generated from (loaded from arraylist)
+        private SpeechRecognitionEngine recognitionEngine;
 
         // ---- Output Streaming ----
         TouchAPI_Server server;
@@ -566,7 +571,7 @@ namespace OmegaWallConnector
                             writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.Z);
 
                             Byte[] omicronData = ms.GetBuffer();
-                            server.SendKinectEvent(omicronData);
+                            server.SendOmicronEvent(omicronData);
                         }
 
                         skeletonSlot++;
@@ -623,6 +628,21 @@ namespace OmegaWallConnector
             Center
         }
 
+        public enum Number
+        {
+            Zero = 0,
+            One,
+            Two,
+            Three,
+            Four,
+            Five,
+            Six,
+            Seven,
+            Eight,
+            Nine,
+            Mark
+        }
+
         public enum SystemType
         {
             None = 0,
@@ -632,7 +652,8 @@ namespace OmegaWallConnector
             Voice,
             Screen,
             Mocap,
-            Computer
+            Computer,
+            Debug
         }
 
         struct WhatSaid
@@ -651,6 +672,7 @@ namespace OmegaWallConnector
             {"Voice Interface", new WhatSaid()      {system = SystemType.Voice}},
             {"Motion Tracking", new WhatSaid()      {system = SystemType.Mocap}},
             {"Computer", new WhatSaid()      {system = SystemType.Computer}},
+            {"Debug Mode", new WhatSaid()      {system = SystemType.Debug}},
         };
 
         static Dictionary<string, WhatSaid> CommandPhrases = new Dictionary<string, WhatSaid>()
@@ -678,11 +700,8 @@ namespace OmegaWallConnector
             return SpeechRecognitionEngine.InstalledRecognizers().Where(matchingFunc).FirstOrDefault();
         }
 
-        private SpeechRecognitionEngine CreateSpeechRecognizer()
+        private void BuildCommandGrammar()
         {
-            RecognizerInfo ri = GetKinectRecognizer();
-            SpeechRecognitionEngine sre = new SpeechRecognitionEngine(ri.Id);
-
             // Here we create the recognized speech library
             // Add all systems and command choices
             var systems = new Choices();
@@ -703,10 +722,21 @@ namespace OmegaWallConnector
             commandSystemGrammer.Append(commands);
             commandSystemGrammer.Append(systems);
 
+            // Add command choices to class list
+            commandControlChoices = new Choices();
+            commandControlChoices.Add(systemCommandGrammer);
+            commandControlChoices.Add(commandSystemGrammer);
+        }
+
+        private SpeechRecognitionEngine CreateSpeechRecognizer()
+        {
+            RecognizerInfo ri = GetKinectRecognizer();
+            recognitionEngine = new SpeechRecognitionEngine(ri.Id);
+                       
             // Other commands - Recognition testing only
             // Real commands should be added to the dictionaries
             var otherChoices = new Choices();
-            otherChoices.Add("red");
+            /*otherChoices.Add("red");
             otherChoices.Add("green");
             otherChoices.Add("blue");
 
@@ -744,17 +774,6 @@ namespace OmegaWallConnector
             otherChoices.Add("Yesterday");
             otherChoices.Add("Tomorrow");
 
-            // Numbers
-            otherChoices.Add("One");
-            otherChoices.Add("Two");
-            otherChoices.Add("Three");
-            otherChoices.Add("Four");
-            otherChoices.Add("Five");
-            otherChoices.Add("Six");
-            otherChoices.Add("Seven");
-            otherChoices.Add("Eight");
-            otherChoices.Add("Nine");
-
             // Greek Letters
             otherChoices.Add("alpha");
             otherChoices.Add("beta");
@@ -772,11 +791,24 @@ namespace OmegaWallConnector
             otherChoices.Add("sigma");
             // ...
             otherChoices.Add("omega");
+            */
+
+            // Loads choices added by config file
+            foreach (String str in speechChoiceList)
+            {
+                speechChoices.Add(str);
+            }
+
+            BuildCommandGrammar();
 
             var allCommands = new Choices();
-            allCommands.Add(systemCommandGrammer);
-            allCommands.Add(commandSystemGrammer);
-            allCommands.Add(otherChoices);
+            allCommands.Add(commandControlChoices); // Add default control commands
+
+            if (speechChoiceList.Count > 0)
+                allCommands.Add(speechChoices);
+            //allCommands.Add(otherChoices);
+
+            
 
             // Final grammer builder for all commands
             var gb = new GrammarBuilder();
@@ -788,12 +820,62 @@ namespace OmegaWallConnector
             // Create the actual Grammar instance, and then load it into the speech recognizer.
             var g = new Grammar(gb);
 
-            sre.LoadGrammar(g);
-            sre.SpeechRecognized += this.SreSpeechRecognized;
-            sre.SpeechHypothesized += this.SreSpeechHypothesized;
-            sre.SpeechRecognitionRejected += this.SreSpeechRecognitionRejected;
+            recognitionEngine.LoadGrammar(g);
+            recognitionEngine.SpeechRecognized += this.SreSpeechRecognized;
+            recognitionEngine.SpeechHypothesized += this.SreSpeechHypothesized;
+            recognitionEngine.SpeechRecognitionRejected += this.SreSpeechRecognitionRejected;
 
-            return sre;
+            
+
+
+            return recognitionEngine;
+        }
+
+        public void AddSpeechGrammarChoice(String choice)
+        {
+            if( !speechChoiceList.Contains(choice) )
+                speechChoiceList.Add(choice);
+        }
+
+        public void RemoveSpeechGrammarChoice(String choice)
+        {
+            speechChoiceList.Remove(choice);
+        }
+
+        public void GenerateNewSpeechGrammar()
+        {
+            RecognizerInfo ri = GetKinectRecognizer();
+
+            speechChoices = new Choices();
+
+            foreach (String str in speechChoiceList)
+            {
+                speechChoices.Add(str);
+            }
+            BuildCommandGrammar();
+
+            var allCommands = new Choices();
+            allCommands.Add(commandControlChoices); // Add default control commands
+
+            if( speechChoiceList.Count > 0 )
+                allCommands.Add(speechChoices);
+
+            // Final grammer builder for all commands
+            var gb = new GrammarBuilder();
+
+            //Specify the culture to match the recognizer in case we are running in a different culture.                                 
+            gb.Culture = ri.Culture;
+            gb.Append(allCommands);
+
+            // Create the actual Grammar instance, and then load it into the speech recognizer.
+            var g = new Grammar(gb);
+
+            // Update the grammar
+            recognitionEngine.RequestRecognizerUpdate();
+            recognitionEngine.UnloadAllGrammars();
+
+            // Load new grammar
+            recognitionEngine.LoadGrammarAsync(g);
         }
 
         private void SreSpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
@@ -827,6 +909,8 @@ namespace OmegaWallConnector
             List<Dictionary<string, WhatSaid>> allDicts = new List<Dictionary<string, WhatSaid>>() { SystemPhrases, CommandPhrases };
 
             var said = new WhatSaid();
+
+            SendKinectSpeech(e.Result.Text, e.Result.Confidence, (float)sourceAngle, (float)sourceAngleConfidence);
 
             float minConfidence = 0.70f;
             bool foundSystem = false;
@@ -867,6 +951,15 @@ namespace OmegaWallConnector
                         //Console.WriteLine("\nRunning Command \t'{1}' on \t{0}", said.system, said.command);
                         //server.SendKinectSpeech(0, (int)said.command, (int)said.system);
                     //}
+
+                    if (said.system == SystemType.Debug && said.command == Command.Enable)
+                    {
+                        EnableVoiceConsoleText();
+                    }
+                    else if (said.system == SystemType.Debug && said.command == Command.Disable)
+                    {
+                        DisableVoiceConsoleText();
+                    }
                 }
                 else if (foundSystem && foundCommand)
                 {
@@ -885,6 +978,42 @@ namespace OmegaWallConnector
             }// if minConfidence
         }// SreSpeechRecognized
 
+        private void SendKinectSpeech(String speechSaid, float speechAccuracy, float angle, float angleAccuracy)
+        {
+            DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
+            long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
 
+            // Omicron (binary) data
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(ms);
+            writer.Write((UInt32)timeStamp);     // Timestamp
+            writer.Write((UInt32)0);    // sourceID
+            writer.Write((UInt32)0);    // serviceID
+            writer.Write((UInt32)EventBase.ServiceType.ServiceTypeSpeech);    // serviceType
+            writer.Write((UInt32)EventBase.Type.Update);    // type
+            writer.Write((UInt32)0);    // flags
+
+            // Head pos
+            writer.Write((Single)0);    // posx
+            writer.Write((Single)0);    // posy
+            writer.Write((Single)0);    // posz
+            writer.Write((Single)0);    // orx
+            writer.Write((Single)0);    // ory
+            writer.Write((Single)0);    // orz
+            writer.Write((Single)0);    // orw
+
+            writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataKinectSpeech);    // extraDataType
+            writer.Write((UInt32)4);    // extraDataItems
+            writer.Write((UInt32)0);    // extraDataMask
+
+            // Extra data
+            writer.Write((String)speechSaid);
+            writer.Write((float)speechAccuracy);
+            writer.Write((float)angle);
+            writer.Write((float)angleAccuracy);
+
+            Byte[] omicronData = ms.GetBuffer();
+            server.SendOmicronEvent(omicronData);
+        }// SendKinectSpeech
     }
 }

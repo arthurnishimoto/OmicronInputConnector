@@ -475,7 +475,7 @@ namespace TouchAPI_PQServer
             sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);
         }
 
-        public void SendKinectEvent(byte[] omicronData)
+        public void SendOmicronEvent(byte[] omicronData)
         {
             hasData = true;
             sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);

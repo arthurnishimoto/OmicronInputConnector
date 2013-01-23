@@ -91,8 +91,17 @@ namespace OmegaWallConnector
             this.depthImage = new System.Windows.Forms.PictureBox();
             this.kinectSkeletonTextCheckBox = new System.Windows.Forms.CheckBox();
             this.kinectGroupBox2 = new System.Windows.Forms.GroupBox();
+            this.speechGrammarListBox = new System.Windows.Forms.ListBox();
+            this.removeGrammarChoiceButton = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
+            this.updateGrammarButton = new System.Windows.Forms.Button();
+            this.newSpeechChoiceTextBox = new System.Windows.Forms.TextBox();
+            this.SpeechLabel = new System.Windows.Forms.Label();
             this.kinectAudioDebugTextCheckBox = new System.Windows.Forms.CheckBox();
             this.voiceRecogCheckBox = new System.Windows.Forms.CheckBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.touchGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.maxBlobSizeBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdBar)).BeginInit();
@@ -105,6 +114,9 @@ namespace OmegaWallConnector
             ((System.ComponentModel.ISupportInitialize)(this.kinectElevationBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).BeginInit();
             this.kinectGroupBox2.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // connectServerButton
@@ -442,12 +454,11 @@ namespace OmegaWallConnector
             this.kinectGroupBox1.Controls.Add(this.kinectEnabledCheckBox);
             this.kinectGroupBox1.Controls.Add(this.depthImage);
             this.kinectGroupBox1.Controls.Add(this.kinectSkeletonTextCheckBox);
-            this.kinectGroupBox1.Location = new System.Drawing.Point(425, 12);
+            this.kinectGroupBox1.Location = new System.Drawing.Point(6, 6);
             this.kinectGroupBox1.Name = "kinectGroupBox1";
-            this.kinectGroupBox1.Size = new System.Drawing.Size(448, 384);
+            this.kinectGroupBox1.Size = new System.Drawing.Size(448, 415);
             this.kinectGroupBox1.TabIndex = 5;
             this.kinectGroupBox1.TabStop = false;
-            this.kinectGroupBox1.Text = "Kinect Skeleton Tracking";
             // 
             // kinectNearModeCheckBox
             // 
@@ -621,14 +632,72 @@ namespace OmegaWallConnector
             // 
             // kinectGroupBox2
             // 
+            this.kinectGroupBox2.Controls.Add(this.speechGrammarListBox);
+            this.kinectGroupBox2.Controls.Add(this.removeGrammarChoiceButton);
+            this.kinectGroupBox2.Controls.Add(this.label7);
+            this.kinectGroupBox2.Controls.Add(this.updateGrammarButton);
+            this.kinectGroupBox2.Controls.Add(this.newSpeechChoiceTextBox);
+            this.kinectGroupBox2.Controls.Add(this.SpeechLabel);
             this.kinectGroupBox2.Controls.Add(this.kinectAudioDebugTextCheckBox);
             this.kinectGroupBox2.Controls.Add(this.voiceRecogCheckBox);
-            this.kinectGroupBox2.Location = new System.Drawing.Point(425, 402);
+            this.kinectGroupBox2.Location = new System.Drawing.Point(3, 6);
             this.kinectGroupBox2.Name = "kinectGroupBox2";
-            this.kinectGroupBox2.Size = new System.Drawing.Size(429, 62);
+            this.kinectGroupBox2.Size = new System.Drawing.Size(451, 415);
             this.kinectGroupBox2.TabIndex = 6;
             this.kinectGroupBox2.TabStop = false;
-            this.kinectGroupBox2.Text = "Kinect Voice Recognition";
+            // 
+            // speechGrammarListBox
+            // 
+            this.speechGrammarListBox.FormattingEnabled = true;
+            this.speechGrammarListBox.Location = new System.Drawing.Point(10, 78);
+            this.speechGrammarListBox.Name = "speechGrammarListBox";
+            this.speechGrammarListBox.Size = new System.Drawing.Size(435, 264);
+            this.speechGrammarListBox.TabIndex = 8;
+            // 
+            // removeGrammarChoiceButton
+            // 
+            this.removeGrammarChoiceButton.Location = new System.Drawing.Point(296, 345);
+            this.removeGrammarChoiceButton.Name = "removeGrammarChoiceButton";
+            this.removeGrammarChoiceButton.Size = new System.Drawing.Size(149, 23);
+            this.removeGrammarChoiceButton.TabIndex = 7;
+            this.removeGrammarChoiceButton.Text = "Remove Selected Choices";
+            this.removeGrammarChoiceButton.UseVisualStyleBackColor = true;
+            this.removeGrammarChoiceButton.Click += new System.EventHandler(this.removeGrammarChoiceButton_Click);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(7, 369);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(127, 13);
+            this.label7.TabIndex = 6;
+            this.label7.Text = "Add New Speech Choice";
+            // 
+            // updateGrammarButton
+            // 
+            this.updateGrammarButton.Location = new System.Drawing.Point(345, 382);
+            this.updateGrammarButton.Name = "updateGrammarButton";
+            this.updateGrammarButton.Size = new System.Drawing.Size(100, 23);
+            this.updateGrammarButton.TabIndex = 5;
+            this.updateGrammarButton.Text = "Update Grammar";
+            this.updateGrammarButton.UseVisualStyleBackColor = true;
+            this.updateGrammarButton.Click += new System.EventHandler(this.updateGrammarButton_Click);
+            // 
+            // newSpeechChoiceTextBox
+            // 
+            this.newSpeechChoiceTextBox.Location = new System.Drawing.Point(10, 385);
+            this.newSpeechChoiceTextBox.Name = "newSpeechChoiceTextBox";
+            this.newSpeechChoiceTextBox.Size = new System.Drawing.Size(329, 20);
+            this.newSpeechChoiceTextBox.TabIndex = 4;
+            // 
+            // SpeechLabel
+            // 
+            this.SpeechLabel.AutoSize = true;
+            this.SpeechLabel.Location = new System.Drawing.Point(7, 60);
+            this.SpeechLabel.Name = "SpeechLabel";
+            this.SpeechLabel.Size = new System.Drawing.Size(126, 13);
+            this.SpeechLabel.TabIndex = 3;
+            this.SpeechLabel.Text = "Current Speech Grammar";
             // 
             // kinectAudioDebugTextCheckBox
             // 
@@ -652,17 +721,48 @@ namespace OmegaWallConnector
             this.voiceRecogCheckBox.UseVisualStyleBackColor = true;
             this.voiceRecogCheckBox.Click += new System.EventHandler(this.voiceRecogCheckBox_Click);
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(423, 11);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(468, 453);
+            this.tabControl1.TabIndex = 7;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.kinectGroupBox1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(460, 427);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Kinect Skeleton Tracking";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.kinectGroupBox2);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(460, 427);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Kinect Speech Recognition";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // GUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(885, 476);
-            this.Controls.Add(this.kinectGroupBox2);
+            this.ClientSize = new System.Drawing.Size(903, 474);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.clientGroupBox);
             this.Controls.Add(this.touchGroupBox);
-            this.Controls.Add(this.kinectGroupBox1);
             this.Name = "GUI";
-            this.Text = "OmicronWallConnector";
+            this.Text = "OmicronInputConnector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GUI_FormClosing);
             this.touchGroupBox.ResumeLayout(false);
             this.touchGroupBox.PerformLayout();
@@ -683,6 +783,9 @@ namespace OmegaWallConnector
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).EndInit();
             this.kinectGroupBox2.ResumeLayout(false);
             this.kinectGroupBox2.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -739,5 +842,14 @@ namespace OmegaWallConnector
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox kinectNearModeCheckBox;
         private System.Windows.Forms.ListBox kinectSensorListBox;
+        private System.Windows.Forms.ListBox speechGrammarListBox;
+        private System.Windows.Forms.Button removeGrammarChoiceButton;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button updateGrammarButton;
+        private System.Windows.Forms.TextBox newSpeechChoiceTextBox;
+        private System.Windows.Forms.Label SpeechLabel;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
     }
 }
