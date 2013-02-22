@@ -32,13 +32,13 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using TouchAPI_PQServer;
+using OmicronSDKServer;
 
 namespace OmegaWallConnector
 {
     public partial class GUI : Form
     {
-        static TouchAPI_Server omegaDesk;
+        static OmicronServer omegaDesk;
         static TouchManager touchManager;
         static KinectManager kinectManager;
 
@@ -54,7 +54,7 @@ namespace OmegaWallConnector
             InitializeComponent();
             SetKinectEnabled(false);
 
-            omegaDesk = new TouchAPI_Server(this); // Handles client connections
+            omegaDesk = new OmicronServer(this); // Handles client connections
             touchManager = new TouchManager(this, omegaDesk); // PQLabs touch
             kinectManager = new KinectManager(this, omegaDesk); // Kinect via Kinect for Windows SDK
 
@@ -205,13 +205,13 @@ namespace OmegaWallConnector
 
             switch (omegaDesk.getOutputType())
             {
-                case (TouchAPI_Server.OutputType.TacTile):
+                case (OmicronServer.OutputType.TacTile):
                     tacTileRadioButton.Checked = true;
                     break;
-                case (TouchAPI_Server.OutputType.Omicron):
+                case (OmicronServer.OutputType.Omicron):
                     oinputserverRadioButton.Checked = true;
                     break;
-                case (TouchAPI_Server.OutputType.Omicron_Legacy):
+                case (OmicronServer.OutputType.Omicron_Legacy):
                     oinputLegacyRadioButton.Checked = true;
                     break;
             }

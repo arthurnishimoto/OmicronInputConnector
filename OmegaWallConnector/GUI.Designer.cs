@@ -363,6 +363,7 @@ namespace OmegaWallConnector
             // tacTileRadioButton
             // 
             this.tacTileRadioButton.AutoSize = true;
+            this.tacTileRadioButton.Enabled = false;
             this.tacTileRadioButton.Location = new System.Drawing.Point(6, 19);
             this.tacTileRadioButton.Name = "tacTileRadioButton";
             this.tacTileRadioButton.Size = new System.Drawing.Size(118, 17);

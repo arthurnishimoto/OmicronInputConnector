@@ -29,7 +29,7 @@ namespace OmegaWallConnector
         static void Main()
         {
             Console.WriteLine("OmicronAPI Connector 1.0");
-            Console.WriteLine("Copyright (C) 2010-2012 Electronic Visualization Laboratory\nUniversity of Illinois at Chicago");
+            Console.WriteLine("Copyright (C) 2010-2013 Electronic Visualization Laboratory\nUniversity of Illinois at Chicago");
             Console.WriteLine("======================================================");
             Console.WriteLine("");
             Application.EnableVisualStyles();

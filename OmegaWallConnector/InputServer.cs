@@ -1,7 +1,7 @@
 ﻿/**
  * ---------------------------------------------
- * TouchAPI_Server.cs
- * Description: Creates a TCP/UDP server for TouchAPI connections.
+ * InputServer.cs
+ * Description: Creates a TCP/UDP server for OmicronAPI connections.
  * 
  * Class: 
  * System: Windows 7 Professional x64
@@ -30,7 +30,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using omicron;
-namespace TouchAPI_PQServer
+namespace OmicronSDKServer
 {
     public enum ServiceType { POINTER, MOCAP, KEYBOARD, CONTROLLER, UI, GENERIC, BRAIN, WAND, AUDIO, SPEECH, KINECT };
     public class Event
@@ -112,7 +112,7 @@ namespace TouchAPI_PQServer
         }
     }
 
-    public class TouchAPI_Server
+    public class OmicronServer
     {
         private static Boolean ENABLE_HOLD = false;
 
@@ -120,7 +120,7 @@ namespace TouchAPI_PQServer
 
         private OutputType outputMode = OutputType.Omicron_Legacy;
 
-        // UdpClient port - TouchAPI message port
+        // UdpClient port - Server message port
         private static int msgPort = 7340;
         IPEndPoint localEndPoint;
 
@@ -152,7 +152,7 @@ namespace TouchAPI_PQServer
 
         private static GUI parent;
 
-        public TouchAPI_Server(GUI p)
+        public OmicronServer(GUI p)
         {
             parent = p;
             clientLock = new Semaphore(1, 1);
@@ -187,7 +187,7 @@ namespace TouchAPI_PQServer
 
         private void StartConnector()
         {
-            // Header
+            // Header (Moved to program.cs)
             //Console.WriteLine("TouchAPI_Server 1.0");
             //Console.WriteLine("Copyright (C) 2010 Electronic Visualization Laboratory\nUniversity of Illinois at Chicago");
             //Console.WriteLine("======================================================");
@@ -220,7 +220,7 @@ namespace TouchAPI_PQServer
 
         private void Listen()
         {
-            Console.WriteLine("Listening for TouchAPI client on " + localEndPoint + " (MsgPort: " + msgPort + ")");
+            Console.WriteLine("Listening for Omicron clients on " + localEndPoint + " (MsgPort: " + msgPort + ")");
                 
             while(serverRunning){
                 listener.Listen(10);
@@ -458,8 +458,13 @@ namespace TouchAPI_PQServer
             writer.Write((Single)0);    // orw
 
             writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataFloatArray);    // extraDataType
-            writer.Write((UInt32)2);    // extraDataItems
-            writer.Write((UInt32)0);    // extraDataMask
+            int extraDataItems = 3;
+            writer.Write((UInt32)extraDataItems);    // extraDataItems
+
+            int myExtraDataValidMask = 0;
+            for (int i = 0; i < extraDataItems; i++)
+                myExtraDataValidMask |= (1 << i);
+            writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
 
             // Extra data
             //MemoryStream ed = new MemoryStream();
@@ -478,44 +483,7 @@ namespace TouchAPI_PQServer
         public void SendOmicronEvent(byte[] omicronData)
         {
             hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString, omicronData);
-        }
-
-        public void SendKinectSpeech(int sourceID, int commandID, int systemID, double sourceAngle, double sourceAngleConfidence)
-        {
-            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
-            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
-
-            touchAPI_dataString = " ";
-            omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + commandID + "," + systemID + "," + sourceAngle + " ";
-
-            hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString, null);
-        }
-
-        public void SendKinectSpeech(int sourceID, String speechText, double resultConfidence, double sourceAngle, double sourceAngleConfidence)
-        {
-            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
-            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
-
-            touchAPI_dataString = " ";
-            omicronLegacy_dataString = (int)ServiceType.SPEECH + ":" + sourceID + "," + speechText + "," + resultConfidence + "," + sourceAngle + "," + sourceAngleConfidence + " ";
-
-            hasData = true;
-            sendToClients(touchAPI_dataString, omicronLegacy_dataString, null);
-        }
-
-        public void SendGestureString(string gestureData)
-        {
-            //timeStamp + ":d:" + tp.id + "," + xPos_ratio + "," + yPos_ratio + "," + 1.0 + " ";
-            //DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
-            //long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
-
-            //dataString = timeStamp + ":d:" + touchID + "," + xPosRatio + "," + yPosRatio + "," + intensity + " ";
-            //dataString = timeStamp + ":l:" + gestureData + " ";
-            //Console.WriteLine(dataString);
-            //hasData = true;
-            //sendToClients(dataString);
+            sendToClients("", "", omicronData);
         }
 
         public void updateHoldData(int[] ids, ArrayList held, float[] x, float[] y, float[] xW, float[] yW)

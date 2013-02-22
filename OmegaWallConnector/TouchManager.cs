@@ -25,7 +25,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using PQ_SDK_MultiTouch;
-using TouchAPI_PQServer;
+using OmicronSDKServer;
 
 using EPQT_Error = PQ_SDK_MultiTouch.PQMTClientImport.EnumPQErrorType;
 using EPQT_TGesture = PQ_SDK_MultiTouch.PQMTClientImport.EnumPQTouchGestureType;
@@ -76,10 +76,10 @@ namespace OmegaWallConnector
         static int min_blob_size = 0;
         static DateTime baseTime;
 
-        static TouchAPI_Server omegaDesk;
+        static OmicronServer omegaDesk;
         static StreamWriter textOut;
 
-        public TouchManager(GUI g, TouchAPI_Server o)
+        public TouchManager(GUI g, OmicronServer o)
         {
             touchID = new int[maxTouches];
             IDsHeld = new ArrayList();
@@ -367,8 +367,7 @@ namespace OmegaWallConnector
                 dataString += tg.param_s[i] + ",";
             }
             dataString += tg.type;
-            if (usePQGestures)
-                omegaDesk.SendGestureString(dataString);
+
             if (touchText && usePQGestures)
                 Console.WriteLine("");
         }

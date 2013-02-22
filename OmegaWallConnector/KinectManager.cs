@@ -33,7 +33,7 @@ using Microsoft.Speech;
 using Microsoft.Speech.AudioFormat;
 using Microsoft.Speech.Recognition;
 
-using TouchAPI_PQServer;
+using OmicronSDKServer;
 using System.Timers;
 using omicron;
 
@@ -80,12 +80,12 @@ namespace OmegaWallConnector
         private SpeechRecognitionEngine recognitionEngine;
 
         // ---- Output Streaming ----
-        TouchAPI_Server server;
+        OmicronServer server;
 
         // ---- Timer ----
         private DispatcherTimer readyTimer;
 
-        public KinectManager(GUI p, TouchAPI_Server o)
+        public KinectManager(GUI p, OmicronServer o)
         {
             kinectTable = new Hashtable();
             newElevationKinectSensorList = new ArrayList();
@@ -486,89 +486,172 @@ namespace OmegaWallConnector
                             writer.Write((Single)0);    // orw
 
                             writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataVector3Array);    // extraDataType
-                            writer.Write((UInt32)18);    // extraDataItems
-                            writer.Write((UInt32)0);    // extraDataMask
 
-                            // Extra data
-                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Z);
+                            int extraDataItems = 27;
+                            writer.Write((UInt32)extraDataItems);    // extraDataItems
 
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Z);
 
+                            int myExtraDataValidMask= 0;
+
+                            myExtraDataValidMask |= (1 << 0);
+                            myExtraDataValidMask |= (1 << 1);
+                            myExtraDataValidMask |= (1 << 6);
+                            myExtraDataValidMask |= (1 << 7);
+                            myExtraDataValidMask |= (1 << 8);
+                            myExtraDataValidMask |= (1 << 9);
+                            myExtraDataValidMask |= (1 << 11);
+                            myExtraDataValidMask |= (1 << 12);
+                            myExtraDataValidMask |= (1 << 13);
+                            myExtraDataValidMask |= (1 << 14);
+                            myExtraDataValidMask |= (1 << 16);
+                            myExtraDataValidMask |= (1 << 17);
+                            myExtraDataValidMask |= (1 << 18);
+                            myExtraDataValidMask |= (1 << 19);
+                            myExtraDataValidMask |= (1 << 21);
+                            myExtraDataValidMask |= (1 << 22);
+                            myExtraDataValidMask |= (1 << 23);
+                            myExtraDataValidMask |= (1 << 24);
+                            myExtraDataValidMask |= (1 << 25);
+                            myExtraDataValidMask |= (1 << 26);
+
+                            writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
+
+                            // Extra data index 0
+                            writer.Write((Single)skeleton.Joints[JointType.HipCenter].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HipCenter].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HipCenter].Position.Z);
+
+                            // Extra data index 1
                             writer.Write((Single)skeleton.Joints[JointType.Head].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.Head].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.Head].Position.Z);
 
-                            // Extra data - Upper body left
+                            // Extra data index 2: Neck (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 3: Torso (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 4: Waist (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 5: Left Collar (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 6
                             writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.ShoulderLeft].Position.Z);
 
+                            // Extra data index 7
                             writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.ElbowLeft].Position.Z);
 
+                            // Extra data index 8
                             writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.WristLeft].Position.Z);
 
+                            // Extra data index 9
                             writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.HandLeft].Position.Z);
 
-                            // Extra data - Upper body right
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Z);
+                            // Extra data index 10: Left Fingertip (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
 
-                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Z);
-
-                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Z);
-
-                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.X);
-                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Y);
-                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Z);
-
-                            // Extra data - lower body left
+                            // Extra data index 11
                             writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.HipLeft].Position.Z);
 
+                            // Extra data index 12
                             writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.KneeLeft].Position.Z);
 
+                            // Extra data index 13
                             writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.AnkleLeft].Position.Z);
 
+                            // Extra data index 14
                             writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.FootLeft].Position.Z);
 
-                            // Extra data - lower body right
+                            // Extra data index 15: Right Collar (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 16
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderRight].Position.Z);
+
+                            // Extra data index 17
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ElbowRight].Position.Z);
+
+                            // Extra data index 18
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.WristRight].Position.Z);
+
+                            // Extra data index 19
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.HandRight].Position.Z);
+
+                            // Extra data index 20: Right Fingertip (OpenNI only)
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+                            writer.Write((Single)0);
+
+                            // Extra data index 21
                             writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.HipRight].Position.Z);
 
+                            // Extra data index 22
                             writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.KneeRight].Position.Z);
 
+                            // Extra data index 23
                             writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.AnkleRight].Position.Z);
 
+                            // Extra data index 24
                             writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.X);
                             writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.Y);
                             writer.Write((Single)skeleton.Joints[JointType.FootRight].Position.Z);
+
+                            // Extra data index 25
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.Spine].Position.Z);
+
+                            // Extra data index 26
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.X);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Y);
+                            writer.Write((Single)skeleton.Joints[JointType.ShoulderCenter].Position.Z);
+
+                            
 
                             Byte[] omicronData = ms.GetBuffer();
                             server.SendOmicronEvent(omicronData);
@@ -871,11 +954,14 @@ namespace OmegaWallConnector
             var g = new Grammar(gb);
 
             // Update the grammar
-            recognitionEngine.RequestRecognizerUpdate();
-            recognitionEngine.UnloadAllGrammars();
+            if (recognitionEngine != null)
+            {
+                recognitionEngine.RequestRecognizerUpdate();
+                recognitionEngine.UnloadAllGrammars();
 
-            // Load new grammar
-            recognitionEngine.LoadGrammarAsync(g);
+                // Load new grammar
+                recognitionEngine.LoadGrammarAsync(g);
+            }
         }
 
         private void SreSpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
@@ -898,8 +984,6 @@ namespace OmegaWallConnector
 
             double sourceAngle = speechSensor.AudioSource.SoundSourceAngle;
             double sourceAngleConfidence = speechSensor.AudioSource.SoundSourceAngleConfidence;
-
-            server.SendKinectSpeech(-1, e.Result.Text, e.Result.Confidence, sourceAngle, sourceAngleConfidence);
 
             status += " Source Angle " + sourceAngle + " " + sourceAngleConfidence;
             if (voiceConsoleText)
@@ -973,7 +1057,6 @@ namespace OmegaWallConnector
                 {
                     if (voiceConsoleText)
                         Console.WriteLine("\nRunning Command \t'{1}' on \t{0}", said.system, said.command);
-                    server.SendKinectSpeech(0, (int)said.command, (int)said.system, sourceAngle, sourceAngleConfidence);
                 }
             }// if minConfidence
         }// SreSpeechRecognized
@@ -1003,14 +1086,20 @@ namespace OmegaWallConnector
             writer.Write((Single)0);    // orw
 
             writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataKinectSpeech);    // extraDataType
-            writer.Write((UInt32)4);    // extraDataItems
-            writer.Write((UInt32)0);    // extraDataMask
+
+            int extraDataItems = 4;
+            writer.Write((UInt32)extraDataItems);    // extraDataItems
+
+            int myExtraDataValidMask = 0;
+            for (int i = 0; i < extraDataItems; i++)
+                myExtraDataValidMask |= (1 << i);
+            writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
 
             // Extra data
+            writer.Write((Single)speechAccuracy);
+            writer.Write((Single)angle);
+            writer.Write((Single)angleAccuracy);
             writer.Write((String)speechSaid);
-            writer.Write((float)speechAccuracy);
-            writer.Write((float)angle);
-            writer.Write((float)angleAccuracy);
 
             Byte[] omicronData = ms.GetBuffer();
             server.SendOmicronEvent(omicronData);
