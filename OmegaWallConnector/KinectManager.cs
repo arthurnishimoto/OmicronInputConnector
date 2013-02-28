@@ -1076,30 +1076,34 @@ namespace OmegaWallConnector
             writer.Write((UInt32)EventBase.Type.Update);    // type
             writer.Write((UInt32)0);    // flags
 
-            // Head pos
-            writer.Write((Single)0);    // posx
-            writer.Write((Single)0);    // posy
-            writer.Write((Single)0);    // posz
+            // Position/Rotation
+            writer.Write((Single)speechAccuracy);    // posx
+            writer.Write((Single)angle);    // posy
+            writer.Write((Single)angleAccuracy);    // posz
             writer.Write((Single)0);    // orx
             writer.Write((Single)0);    // ory
             writer.Write((Single)0);    // orz
             writer.Write((Single)0);    // orw
 
-            writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataKinectSpeech);    // extraDataType
+            writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataString);    // extraDataType
 
-            int extraDataItems = 4;
+            // Extra data
+            speechSaid += "\0";
+            int extraDataItems = speechSaid.Length * sizeof(char);
+
             writer.Write((UInt32)extraDataItems);    // extraDataItems
 
             int myExtraDataValidMask = 0;
-            for (int i = 0; i < extraDataItems; i++)
-                myExtraDataValidMask |= (1 << i);
+            //for (int i = 0; i < extraDataItems; i++)
+            //    myExtraDataValidMask |= (1 << i);
             writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
 
-            // Extra data
-            writer.Write((Single)speechAccuracy);
-            writer.Write((Single)angle);
-            writer.Write((Single)angleAccuracy);
-            writer.Write((String)speechSaid);
+            //byte[] strBuffer = new byte[omicronConnector.EventData.ExtraDataSize];
+            //System.Buffer.BlockCopy(speechSaid.ToCharArray(), 0, strBuffer, 0, omicronConnector.EventData.ExtraDataSize);
+
+            byte[] strBuffer = System.Text.Encoding.UTF8.GetBytes(speechSaid);
+
+            writer.Write(strBuffer);
 
             Byte[] omicronData = ms.GetBuffer();
             server.SendOmicronEvent(omicronData);

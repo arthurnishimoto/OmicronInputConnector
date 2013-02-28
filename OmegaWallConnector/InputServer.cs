@@ -207,7 +207,7 @@ namespace OmicronSDKServer
                 SocketType.Stream, ProtocolType.Tcp);
 
             // Prepare socket to be set when client connect
-            udpClient = new UdpClient(msgPort);
+            udpClient = new UdpClient();
 
             listener.Bind(localEndPoint);
             listenerThread = new Thread(Listen);
