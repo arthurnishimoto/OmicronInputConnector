@@ -8,8 +8,8 @@
     <ProjectGuid>{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OmicronWallConnector</RootNamespace>
-    <AssemblyName>OmicronWallConnector</AssemblyName>
+    <RootNamespace>OmicronInputConnector</RootNamespace>
+    <AssemblyName>OmicronInputConnector</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
