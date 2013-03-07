@@ -85,6 +85,15 @@ namespace OmegaWallConnector
 
             bool serverOnStartup = false; // Config state to start server on startup?
 
+
+            // Check for libraries
+            if (touchManager.IsDisabled())
+                touchGroupBox.Enabled = false;
+            if (kinectManager.IsDisabled())
+            {
+                kinectTabControl.Enabled = false;
+            }
+
             // Read the config file
             try
             {
@@ -454,8 +463,7 @@ namespace OmegaWallConnector
             }
             else
             {
-                touchManager.InitAndConnectServer();
-                touchEnableBox.Checked = true;
+                touchEnableBox.Checked = touchManager.InitAndConnectServer();
             }
         }
 

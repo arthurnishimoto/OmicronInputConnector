@@ -47,6 +47,7 @@ namespace OmegaWallConnector
         static SkeletonMode skeletonMode = SkeletonMode.Default;
 
         static Hashtable kinectTable; // List of all KinectSensor objects
+        private bool disabled = false;
 
         // ---- Elevation control ----
         public static Timer elevationTimer; // Timer used to limit sensor motor movement
@@ -78,7 +79,7 @@ namespace OmegaWallConnector
         public ArrayList speechChoiceList = new ArrayList(); // String representation of grammar list
         private Choices speechChoices; // List speech grammar will be generated from (loaded from arraylist)
         private SpeechRecognitionEngine recognitionEngine;
-
+        
         // ---- Output Streaming ----
         OmicronServer server;
 
@@ -87,32 +88,47 @@ namespace OmegaWallConnector
 
         public KinectManager(GUI p, OmicronServer o)
         {
-            kinectTable = new Hashtable();
-            newElevationKinectSensorList = new ArrayList();
+            try
+            {
+                kinectTable = new Hashtable();
+                newElevationKinectSensorList = new ArrayList();
 
-            //kinectColorViewer = new KinectColorViewer(p);
-            kinectDepthViewer = new KinectDepthViewer(p);
+                //kinectColorViewer = new KinectColorViewer(p);
+                kinectDepthViewer = new KinectDepthViewer(p);
 
-            //KinectSkeletonViewerOnDepth = new KinectSkeletonViewer(p);
-            //KinectSkeletonViewerOnDepth.ShowBones = true;
-            //KinectSkeletonViewerOnDepth.ShowJoints = true;
-            //KinectSkeletonViewerOnDepth.ShowCenter = true;
-            //KinectSkeletonViewerOnDepth.ImageType = ImageType.Depth;
+                //KinectSkeletonViewerOnDepth = new KinectSkeletonViewer(p);
+                //KinectSkeletonViewerOnDepth.ShowBones = true;
+                //KinectSkeletonViewerOnDepth.ShowJoints = true;
+                //KinectSkeletonViewerOnDepth.ShowCenter = true;
+                //KinectSkeletonViewerOnDepth.ImageType = ImageType.Depth;
 
-            //ShowBones="true" ShowJoints="true" ShowCenter="true" ImageType="Depth"
-            server = o;
-            gui = p;
-            KinectStart();
+                //ShowBones="true" ShowJoints="true" ShowCenter="true" ImageType="Depth"
+                server = o;
+                gui = p;
+                KinectStart();
 
-            // Create a timer with a ten second interval.
-            elevationTimer = new Timer(10000);
+                // Create a timer with a ten second interval.
+                elevationTimer = new Timer(10000);
 
-            // Hook up the Elapsed event for the timer.
-            elevationTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+                // Hook up the Elapsed event for the timer.
+                elevationTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
-            elevationTimer.Interval = timerIncrement;
-            elevationTimer.Enabled = true;
+                elevationTimer.Interval = timerIncrement;
+                elevationTimer.Enabled = true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("KinectManager: Failed to find Kinect for Windows Runtime v1.6!");
+                //Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
+                Console.WriteLine("KinectManager: Disabling Kinect");
+                disabled = true;
+            }
         }// CTOR
+
+        public bool IsDisabled()
+        {
+            return disabled;
+        }
 
         // ------- Kinect Initializations ---------------------------------------------------------
         public void KinectStart()

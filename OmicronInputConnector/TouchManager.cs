@@ -79,6 +79,8 @@ namespace OmegaWallConnector
         static OmicronServer omegaDesk;
         static StreamWriter textOut;
 
+        private bool disabled = false;
+
         public TouchManager(GUI g, OmicronServer o)
         {
             touchID = new int[maxTouches];
@@ -95,7 +97,31 @@ namespace OmegaWallConnector
                 ID_x[i] = 0;
                 ID_y[i] = 0;
             }
+
+            // Initialize to check if DLL is present
+            try
+            {
+                // initialize
+                InitFuncOnTG();
+
+                // set the functions on receive
+                SetFuncsOnReceiveProc();
+
+                disabled = false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("TouchManager: Initialization exception: {0}", ex.Message);
+                Console.WriteLine("TouchManager: Disabling touch");
+                disabled = true;
+            }
         }
+
+        public bool IsDisabled()
+        {
+            return disabled;
+        }
+
         public bool InitAndConnectServer()
         {
             return InitAndConnectServer(touchServer_ip);
@@ -160,6 +186,7 @@ namespace OmegaWallConnector
             catch (Exception ex)
             {
                 Console.WriteLine(" exception: {0}", ex.Message);
+                disabled = true;
             }
             return false;
         }

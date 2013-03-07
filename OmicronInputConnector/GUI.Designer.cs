@@ -99,7 +99,7 @@ namespace OmegaWallConnector
             this.SpeechLabel = new System.Windows.Forms.Label();
             this.kinectAudioDebugTextCheckBox = new System.Windows.Forms.CheckBox();
             this.voiceRecogCheckBox = new System.Windows.Forms.CheckBox();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.kinectTabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.touchGroupBox.SuspendLayout();
@@ -114,7 +114,7 @@ namespace OmegaWallConnector
             ((System.ComponentModel.ISupportInitialize)(this.kinectElevationBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).BeginInit();
             this.kinectGroupBox2.SuspendLayout();
-            this.tabControl1.SuspendLayout();
+            this.kinectTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.SuspendLayout();
@@ -722,15 +722,15 @@ namespace OmegaWallConnector
             this.voiceRecogCheckBox.UseVisualStyleBackColor = true;
             this.voiceRecogCheckBox.Click += new System.EventHandler(this.voiceRecogCheckBox_Click);
             // 
-            // tabControl1
+            // kinectTabControl
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(423, 11);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(468, 453);
-            this.tabControl1.TabIndex = 7;
+            this.kinectTabControl.Controls.Add(this.tabPage1);
+            this.kinectTabControl.Controls.Add(this.tabPage2);
+            this.kinectTabControl.Location = new System.Drawing.Point(423, 11);
+            this.kinectTabControl.Name = "kinectTabControl";
+            this.kinectTabControl.SelectedIndex = 0;
+            this.kinectTabControl.Size = new System.Drawing.Size(468, 453);
+            this.kinectTabControl.TabIndex = 7;
             // 
             // tabPage1
             // 
@@ -759,7 +759,7 @@ namespace OmegaWallConnector
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(903, 474);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.kinectTabControl);
             this.Controls.Add(this.clientGroupBox);
             this.Controls.Add(this.touchGroupBox);
             this.Name = "GUI";
@@ -784,7 +784,7 @@ namespace OmegaWallConnector
             ((System.ComponentModel.ISupportInitialize)(this.depthImage)).EndInit();
             this.kinectGroupBox2.ResumeLayout(false);
             this.kinectGroupBox2.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
+            this.kinectTabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -849,7 +849,7 @@ namespace OmegaWallConnector
         private System.Windows.Forms.Button updateGrammarButton;
         private System.Windows.Forms.TextBox newSpeechChoiceTextBox;
         private System.Windows.Forms.Label SpeechLabel;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl kinectTabControl;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
     }
