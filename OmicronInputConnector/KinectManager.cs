@@ -36,6 +36,7 @@ using Microsoft.Speech.Recognition;
 using OmicronSDKServer;
 using System.Timers;
 using omicron;
+using Renci.SshNet;
 
 namespace OmegaWallConnector
 {
@@ -118,11 +119,12 @@ namespace OmegaWallConnector
             }
             catch (Exception e)
             {
-                Console.WriteLine("KinectManager: Failed to find Kinect for Windows Runtime v1.6!");
-                //Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
+                //Console.WriteLine("KinectManager: Failed to find Kinect for Windows Runtime v1.6!");
+                Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
                 Console.WriteLine("KinectManager: Disabling Kinect");
                 disabled = true;
             }
+
         }// CTOR
 
         public bool IsDisabled()
@@ -891,7 +893,7 @@ namespace OmegaWallConnector
             // ...
             otherChoices.Add("omega");
             */
-
+            
             // Loads choices added by config file
             foreach (String str in speechChoiceList)
             {
@@ -915,6 +917,7 @@ namespace OmegaWallConnector
             //Specify the culture to match the recognizer in case we are running in a different culture.                                 
             gb.Culture = ri.Culture;
             gb.Append(allCommands);
+            
 
             // Create the actual Grammar instance, and then load it into the speech recognizer.
             var g = new Grammar(gb);
@@ -969,6 +972,12 @@ namespace OmegaWallConnector
             // Create the actual Grammar instance, and then load it into the speech recognizer.
             var g = new Grammar(gb);
 
+            // Create a grammar from grammar definition XML file.
+            using (var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(OmicronInputConnector.Properties.Resources.SpeechGrammar)))
+            {
+                g = new Grammar(memoryStream);
+            }
+
             // Update the grammar
             if (recognitionEngine != null)
             {
@@ -997,14 +1006,16 @@ namespace OmegaWallConnector
         private void SreSpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             string status = "Recognized: " + e.Result.Text + " " + e.Result.Confidence;
-
+            
             double sourceAngle = speechSensor.AudioSource.SoundSourceAngle;
             double sourceAngleConfidence = speechSensor.AudioSource.SoundSourceAngleConfidence;
 
             status += " Source Angle " + sourceAngle + " " + sourceAngleConfidence;
             if (voiceConsoleText)
+            {
                 Console.WriteLine(status);
-
+            }
+            
             // Look for a match in the order of the lists below, first match wins.
             List<Dictionary<string, WhatSaid>> allDicts = new List<Dictionary<string, WhatSaid>>() { SystemPhrases, CommandPhrases };
 
@@ -1072,7 +1083,9 @@ namespace OmegaWallConnector
                 if (said.system != SystemType.None && said.command != Command.None)
                 {
                     if (voiceConsoleText)
+                    {
                         Console.WriteLine("\nRunning Command \t'{1}' on \t{0}", said.system, said.command);
+                    }
                 }
             }// if minConfidence
         }// SreSpeechRecognized

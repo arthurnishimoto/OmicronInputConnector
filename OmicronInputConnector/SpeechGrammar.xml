@@ -1,0 +1,87 @@
+﻿<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+	<rule id = "rootRule" scope="public">
+		<item>
+			<item>
+				<one-of>
+					<item> CAVE TWO </item>
+					<item> CAVE </item>
+				</one-of>
+			</item>
+			
+			<one-of>
+				<item>
+					<ruleref uri="#sysCommandTypes" />
+					<ruleref uri="#systemTypes" />
+				</item>
+				<item>
+					<ruleref uri="#systemTypes" />
+					<ruleref uri="#sysCommandTypes" />
+				</item>
+			</one-of>
+		</item>
+	</rule>
+	
+	<rule id = "systemTypes" scope="public">
+		<one-of>
+			<item>
+				<tag> SCREEN </tag>
+				<one-of>
+					<item> SCREEN </item>
+					<item> SCREENS </item>
+					<item> DISPLAY </item>
+					<item> DISPLAYS </item>
+				</one-of>
+			</item>
+			<item> SAGE </item>
+			<item> OMEGALIB </item>
+			<item> MARS </item>
+			<item> VORTEX </item>
+			<item>
+				<tag> MOLECULE </tag>
+				<one-of>
+					<item> MOLECULE </item>
+					<item> PARTY FAVORS </item>
+				</one-of>
+			</item>
+			<item>
+				<tag> BRAIN </tag>
+				<one-of>
+					<item> BRAIN </item>
+					<item> CONNECTOME </item>
+					<item> STRING CHEESE </item>
+				</one-of>
+			</item>
+			<item>
+				<tag> ENTERPRISE </tag>
+				<one-of>
+					<item> ENTERPRISE </item>
+					<item> STAR TREK </item>
+				</one-of>
+			</item>
+			<item> CALVR </item>
+		</one-of>
+	</rule>
+	
+	<rule id = "sysCommandTypes" scope="public">
+		<one-of>
+			<item>
+				<tag> START </tag>
+				<one-of>
+					<item> ENABLE </item>
+					<item> ON </item>
+					<item> ACTIVATE </item>
+					<item> START </item>
+				</one-of>
+			</item>
+			<item>
+				<tag> STOP </tag>
+				<one-of>
+					<item> DISABLE </item>
+					<item> OFF </item>
+					<item> DEACTIVATE </item>
+					<item> STOP </item>
+				</one-of>
+			</item>
+		</one-of>
+	</rule>
+</grammar>
