@@ -47,6 +47,8 @@ namespace OmegaWallConnector
         static Boolean touchText = false;
         static Boolean generateLog = false;
 
+        static Boolean kinectEnabled = false;
+
         delegate void SetListBoxCallback(List<String> text);
 
         public GUI()
@@ -56,7 +58,17 @@ namespace OmegaWallConnector
 
             omegaDesk = new OmicronServer(this); // Handles client connections
             touchManager = new TouchManager(this, omegaDesk); // PQLabs touch
-            kinectManager = new KinectManager(this, omegaDesk); // Kinect via Kinect for Windows SDK
+            try
+            {
+                kinectManager = new KinectManager(this, omegaDesk); // Kinect via Kinect for Windows SDK
+                kinectEnabled = true;
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
+                Console.WriteLine("KinectManager: Failed to find Kinect SDK v1.7");
+                Console.WriteLine("KinectManager: Disabling Kinect");
+            }
 
             // Default GUI values
             touchServerList.Text = touchManager.GetServerIP();
@@ -65,8 +77,11 @@ namespace OmegaWallConnector
             pqGestureBox.Checked = touchManager.IsPQGesturesEnabled();
             touchPointBox.Checked = touchManager.IsTouchPointsEnabled();
 
-            voiceRecogCheckBox.Checked = kinectManager.IsVoiceInterfaceEnabled();
-            kinectAudioDebugTextCheckBox.Checked = kinectManager.IsVoiceConsoleTextEnabled();
+            if (kinectEnabled)
+            {
+                voiceRecogCheckBox.Checked = kinectManager.IsVoiceInterfaceEnabled();
+                kinectAudioDebugTextCheckBox.Checked = kinectManager.IsVoiceConsoleTextEnabled();
+            }
 
             if( kinectSensorListBox.Items.Count > 0 )
                 kinectSensorListBox.SelectedIndex = 0;
@@ -89,7 +104,7 @@ namespace OmegaWallConnector
             // Check for libraries
             if (touchManager.IsDisabled())
                 touchGroupBox.Enabled = false;
-            if (kinectManager.IsDisabled())
+            if (!kinectEnabled)
             {
                 kinectTabControl.Enabled = false;
             }
@@ -189,7 +204,8 @@ namespace OmegaWallConnector
                         }
                         if (readingKinectSpeechList && !line.Contains("{") && !line.Contains("}"))
                         {
-                            kinectManager.AddSpeechGrammarChoice(line);
+                            if( kinectEnabled )
+                                kinectManager.AddSpeechGrammarChoice(line);
                         }
                     }
                 }
@@ -227,10 +243,13 @@ namespace OmegaWallConnector
 
 
             // Update speech grammar and refresh GUI list
-            kinectManager.GenerateNewSpeechGrammar();
+            if (kinectEnabled)
+                kinectManager.GenerateNewSpeechGrammar();
             speechGrammarListBox.Items.Clear();
-            foreach( String s in kinectManager.speechChoiceList )
-                speechGrammarListBox.Items.Add(s);
+
+            if (kinectEnabled)
+                foreach( String s in kinectManager.speechChoiceList )
+                    speechGrammarListBox.Items.Add(s);
 
             //switch (kinectManager.GetSkeletonMode())
             //{
@@ -331,7 +350,8 @@ namespace OmegaWallConnector
                 textOut.Close();
 
             // Close managers
-            kinectManager.KinectStop();
+            if (kinectEnabled)
+                kinectManager.KinectStop();
 
             Environment.Exit(0);
         }
@@ -420,13 +440,16 @@ namespace OmegaWallConnector
 
         private void voiceRecogCheckBox_Click(object sender, EventArgs e)
         {
-            if (kinectManager.IsVoiceInterfaceEnabled())
+            if (kinectEnabled)
             {
-                kinectManager.DisableVoiceInterface();
-            }
-            else
-            {
-                kinectManager.EnableVoiceInterface();
+                if (kinectManager.IsVoiceInterfaceEnabled())
+                {
+                    kinectManager.DisableVoiceInterface();
+                }
+                else
+                {
+                    kinectManager.EnableVoiceInterface();
+                }
             }
         }
 
@@ -444,13 +467,16 @@ namespace OmegaWallConnector
 
         private void kinectEnabledCheckBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (kinectEnabledCheckBox.Checked)
+            if (kinectEnabled)
             {
-                kinectManager.KinectStart();
-            }
-            else
-            {
-                kinectManager.KinectStop();
+                if (kinectEnabledCheckBox.Checked)
+                {
+                    kinectManager.KinectStart();
+                }
+                else
+                {
+                    kinectManager.KinectStop();
+                }
             }
         }
 
@@ -469,63 +495,77 @@ namespace OmegaWallConnector
 
         private void kinectAudioDebugTextCheckBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (kinectManager.IsVoiceConsoleTextEnabled())
+            if (kinectEnabled)
             {
-                Console.WriteLine("Kinect Voice Console Text Disabled");
-                kinectManager.DisableVoiceConsoleText();
-                kinectAudioDebugTextCheckBox.Checked = false;
-            }
-            else
-            {
-                Console.WriteLine("Kinect Voice Console Text Enabled");
-                kinectManager.EnableVoiceConsoleText();
-                kinectAudioDebugTextCheckBox.Checked = true;
+                if (kinectManager.IsVoiceConsoleTextEnabled())
+                {
+                    Console.WriteLine("Kinect Voice Console Text Disabled");
+                    kinectManager.DisableVoiceConsoleText();
+                    kinectAudioDebugTextCheckBox.Checked = false;
+                }
+                else
+                {
+                    Console.WriteLine("Kinect Voice Console Text Enabled");
+                    kinectManager.EnableVoiceConsoleText();
+                    kinectAudioDebugTextCheckBox.Checked = true;
+                }
             }
         }
 
         private void kinectElevationBar_ValueChanged(object sender, EventArgs e)
         {
-            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            if (kinectEnabled)
             {
-                kinectManager.SetKinectElevation(itemChecked.ToString(),kinectElevationBar.Value);
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                {
+                    kinectManager.SetKinectElevation(itemChecked.ToString(), kinectElevationBar.Value);
+                }
+
+                elevationLabel.Text = kinectElevationBar.Value.ToString();
             }
-           
-            elevationLabel.Text = kinectElevationBar.Value.ToString();
         }
 
         private void kinectSkeletonDefaultButton_MouseClick(object sender, MouseEventArgs e)
         {
-            
-            if (kinectSkeletonDefaultButton.Checked)
+            if (kinectEnabled)
             {
-                Console.WriteLine("Kinect Skeleton Mode: Default");
-                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                if (kinectSkeletonDefaultButton.Checked)
                 {
-                    kinectManager.SetSkeletonModeDefault(itemChecked.ToString());
+                    Console.WriteLine("Kinect Skeleton Mode: Default");
+                    foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                    {
+                        kinectManager.SetSkeletonModeDefault(itemChecked.ToString());
+                    }
                 }
             }
         }
 
         private void kinectSkeletonSeatedButton_MouseClick(object sender, MouseEventArgs e)
         {
-            if (kinectSkeletonSeatedButton.Checked)
+            if (kinectEnabled)
             {
-                Console.WriteLine("Kinect Skeleton Mode: Seated");
-                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                if (kinectSkeletonSeatedButton.Checked)
                 {
-                    kinectManager.SetSkeletonModeSeated(itemChecked.ToString());
+                    Console.WriteLine("Kinect Skeleton Mode: Seated");
+                    foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                    {
+                        kinectManager.SetSkeletonModeSeated(itemChecked.ToString());
+                    }
                 }
             }
         }
 
         private void kinectSkeletonOffButton_MouseClick(object sender, MouseEventArgs e)
         {
-            if (kinectSkeletonOffButton.Checked)
+            if (kinectEnabled)
             {
-                Console.WriteLine("Kinect Skeleton Mode: Off");
-                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                if (kinectSkeletonOffButton.Checked)
                 {
-                    kinectManager.SetSkeletonModeOff(itemChecked.ToString());
+                    Console.WriteLine("Kinect Skeleton Mode: Off");
+                    foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+                    {
+                        kinectManager.SetSkeletonModeOff(itemChecked.ToString());
+                    }
                 }
             }
         }
@@ -551,101 +591,112 @@ namespace OmegaWallConnector
         private void kinectSensorListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             //Console.WriteLine("kinectSensorListBox_SelectedIndexChanged");
-
-            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            if (kinectEnabled)
             {
-                // Get the selected sensor's current elevation
-                kinectCurrentAngleLabel.Text = kinectManager.GetKinectElevation(itemChecked.ToString()).ToString();
-
-                // Get the selected sensor's depth image
-                kinectManager.SetDepthView(itemChecked.ToString());
-
-                //  Get the selected sensor's near mode
-                if (kinectManager.HasNearModeSupport(itemChecked.ToString()))
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
                 {
-                    kinectNearModeCheckBox.Enabled = true;
-                    kinectNearModeCheckBox.Checked = kinectManager.GetNearMode(itemChecked.ToString());
-                }
-                else
-                {
-                    kinectNearModeCheckBox.Enabled = false;
-                }
+                    // Get the selected sensor's current elevation
+                    kinectCurrentAngleLabel.Text = kinectManager.GetKinectElevation(itemChecked.ToString()).ToString();
 
-                // Get the selected sensor's tracking mode
-                switch (kinectManager.GetSkeletonMode(itemChecked.ToString()))
-                {
-                    case (KinectManager.SkeletonMode.Off):
-                        kinectSkeletonDefaultButton.Enabled = true;
-                        kinectSkeletonSeatedButton.Enabled = true;
-                        kinectSkeletonOffButton.Checked = true;
-                        break;
-                    case (KinectManager.SkeletonMode.Default):
-                        kinectSkeletonDefaultButton.Enabled = true;
-                        kinectSkeletonSeatedButton.Enabled = true;
-                        kinectSkeletonDefaultButton.Checked = true;
-                        break;
-                    case (KinectManager.SkeletonMode.Seated):
-                        kinectSkeletonDefaultButton.Enabled = true;
-                        kinectSkeletonSeatedButton.Enabled = true;
-                        kinectSkeletonSeatedButton.Checked = true;
-                        break;
-                    default:
-                        kinectSkeletonOffButton.Checked = true;
-                        kinectSkeletonDefaultButton.Enabled = false;
-                        kinectSkeletonSeatedButton.Enabled = false;
-                        break;
+                    // Get the selected sensor's depth image
+                    kinectManager.SetDepthView(itemChecked.ToString());
+
+                    //  Get the selected sensor's near mode
+                    if (kinectManager.HasNearModeSupport(itemChecked.ToString()))
+                    {
+                        kinectNearModeCheckBox.Enabled = true;
+                        kinectNearModeCheckBox.Checked = kinectManager.GetNearMode(itemChecked.ToString());
+                    }
+                    else
+                    {
+                        kinectNearModeCheckBox.Enabled = false;
+                    }
+
+                    // Get the selected sensor's tracking mode
+                    switch (kinectManager.GetSkeletonMode(itemChecked.ToString()))
+                    {
+                        case (KinectManager.SkeletonMode.Off):
+                            kinectSkeletonDefaultButton.Enabled = true;
+                            kinectSkeletonSeatedButton.Enabled = true;
+                            kinectSkeletonOffButton.Checked = true;
+                            break;
+                        case (KinectManager.SkeletonMode.Default):
+                            kinectSkeletonDefaultButton.Enabled = true;
+                            kinectSkeletonSeatedButton.Enabled = true;
+                            kinectSkeletonDefaultButton.Checked = true;
+                            break;
+                        case (KinectManager.SkeletonMode.Seated):
+                            kinectSkeletonDefaultButton.Enabled = true;
+                            kinectSkeletonSeatedButton.Enabled = true;
+                            kinectSkeletonSeatedButton.Checked = true;
+                            break;
+                        default:
+                            kinectSkeletonOffButton.Checked = true;
+                            kinectSkeletonDefaultButton.Enabled = false;
+                            kinectSkeletonSeatedButton.Enabled = false;
+                            break;
+                    }
                 }
             }
         }
 
         private void kinectNearModeCheckBox_Click(object sender, EventArgs e)
         {
-            foreach (object itemChecked in kinectSensorListBox.SelectedItems)
+            if (kinectEnabled)
             {
-                if (kinectNearModeCheckBox.Checked)
+                foreach (object itemChecked in kinectSensorListBox.SelectedItems)
                 {
+                    if (kinectNearModeCheckBox.Checked)
+                    {
 
-                    kinectManager.SetNearMode(itemChecked.ToString(), true);
-                }
-                else
-                {
-                    kinectManager.SetNearMode(itemChecked.ToString(), false);
+                        kinectManager.SetNearMode(itemChecked.ToString(), true);
+                    }
+                    else
+                    {
+                        kinectManager.SetNearMode(itemChecked.ToString(), false);
+                    }
                 }
             }
-
         }
 
         private void updateGrammarButton_Click(object sender, EventArgs e)
         {
-            if (newSpeechChoiceTextBox.TextLength > 0)
+            if (kinectEnabled)
             {
-                kinectManager.AddSpeechGrammarChoice(newSpeechChoiceTextBox.Text);
-                newSpeechChoiceTextBox.Text = "";
+                if (newSpeechChoiceTextBox.TextLength > 0)
+                {
+                    kinectManager.AddSpeechGrammarChoice(newSpeechChoiceTextBox.Text);
+                    newSpeechChoiceTextBox.Text = "";
+                }
+
+
+                // Update grammar
+                kinectManager.GenerateNewSpeechGrammar();
+
+                // Refresh GUI list
+                speechGrammarListBox.Items.Clear();
+                foreach (String s in kinectManager.speechChoiceList)
+                    speechGrammarListBox.Items.Add(s);
             }
-
-            // Update grammar
-            kinectManager.GenerateNewSpeechGrammar();
-
-            // Refresh GUI list
-            speechGrammarListBox.Items.Clear();
-            foreach( String s in kinectManager.speechChoiceList )
-                speechGrammarListBox.Items.Add(s);
         }
 
         private void removeGrammarChoiceButton_Click(object sender, EventArgs e)
         {
-            foreach (String s in speechGrammarListBox.SelectedItems)
+            if (kinectEnabled)
             {
-                kinectManager.RemoveSpeechGrammarChoice(s);
+                foreach (String s in speechGrammarListBox.SelectedItems)
+                {
+                    kinectManager.RemoveSpeechGrammarChoice(s);
+                }
+
+                // Update grammar
+                kinectManager.GenerateNewSpeechGrammar();
+
+                // Refresh GUI list
+                speechGrammarListBox.Items.Clear();
+                foreach (String s in kinectManager.speechChoiceList)
+                    speechGrammarListBox.Items.Add(s);
             }
-
-            // Update grammar
-            kinectManager.GenerateNewSpeechGrammar();
-
-            // Refresh GUI list
-            speechGrammarListBox.Items.Clear();
-            foreach (String s in kinectManager.speechChoiceList)
-                speechGrammarListBox.Items.Add(s);
         }
     }
     

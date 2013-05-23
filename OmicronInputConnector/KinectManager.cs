@@ -36,7 +36,6 @@ using Microsoft.Speech.Recognition;
 using OmicronSDKServer;
 using System.Timers;
 using omicron;
-using Renci.SshNet;
 
 namespace OmegaWallConnector
 {
@@ -89,8 +88,6 @@ namespace OmegaWallConnector
 
         public KinectManager(GUI p, OmicronServer o)
         {
-            try
-            {
                 kinectTable = new Hashtable();
                 newElevationKinectSensorList = new ArrayList();
 
@@ -116,14 +113,6 @@ namespace OmegaWallConnector
 
                 elevationTimer.Interval = timerIncrement;
                 elevationTimer.Enabled = true;
-            }
-            catch (Exception e)
-            {
-                //Console.WriteLine("KinectManager: Failed to find Kinect for Windows Runtime v1.6!");
-                Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
-                Console.WriteLine("KinectManager: Disabling Kinect");
-                disabled = true;
-            }
 
         }// CTOR
 
