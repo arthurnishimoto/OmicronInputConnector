@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmicronInputConnector", "OmicronInputConnector\OmicronInputConnector.csproj", "{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "Installer\OmicronInstaller.vdproj", "{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,14 @@ Global
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|x64.ActiveCfg = Release|x64
 		{46ADB4CB-7A7E-4DBB-8335-BCC4C11C113F}.Release|x64.Build.0 = Release|x64
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Debug|Any CPU.ActiveCfg = Debug
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Debug|Any CPU.Build.0 = Debug
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Debug|x64.ActiveCfg = Debug
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Debug|x64.Build.0 = Debug
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Release|Any CPU.ActiveCfg = Release
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Release|Any CPU.Build.0 = Release
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Release|x64.ActiveCfg = Release
+		{AD35948F-16B1-4E55-8B5F-8E7D4C3F7475}.Release|x64.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
