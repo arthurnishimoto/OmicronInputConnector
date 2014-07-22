@@ -555,7 +555,7 @@ namespace OmegaWallConnector
 
                         writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataVector3Array);    // extraDataType
 
-                        int extraDataItems = 27;
+                        int extraDataItems = 29;
                         writer.Write((UInt32)extraDataItems);    // extraDataItems
 
 
@@ -581,23 +581,25 @@ namespace OmegaWallConnector
                         myExtraDataValidMask |= (1 << 24);
                         myExtraDataValidMask |= (1 << 25);
                         myExtraDataValidMask |= (1 << 26);
+                        myExtraDataValidMask |= (1 << 27);
+                        myExtraDataValidMask |= (1 << 28);
 
                         writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
 
-                        // Extra data index 0: Hip Center (Kinect v1.x only)
-                        writer.Write((Single)0);
-                        writer.Write((Single)0);
-                        writer.Write((Single)0);
+                        // Extra data index 0: Hip Center (Kinect only)
+                        writer.Write((Single)body.Joints[JointType.SpineBase].Position.X);
+                        writer.Write((Single)body.Joints[JointType.SpineBase].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.SpineBase].Position.Z);
 
                         // Extra data index 1
                         writer.Write((Single)body.Joints[JointType.Head].Position.X);
                         writer.Write((Single)body.Joints[JointType.Head].Position.Y);
                         writer.Write((Single)body.Joints[JointType.Head].Position.Z);
 
-                        // Extra data index 2: Neck (OpenNI only)
-                        writer.Write((Single)0);
-                        writer.Write((Single)0);
-                        writer.Write((Single)0);
+                        // Extra data index 2: Neck (OpenNI and Kinect v2.0 only)
+                        writer.Write((Single)body.Joints[JointType.Neck].Position.X);
+                        writer.Write((Single)body.Joints[JointType.Neck].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.Neck].Position.Z);
 
                         // Extra data index 3: Torso (OpenNI only)
                         writer.Write((Single)0);
@@ -709,17 +711,25 @@ namespace OmegaWallConnector
                         writer.Write((Single)body.Joints[JointType.FootRight].Position.Y);
                         writer.Write((Single)body.Joints[JointType.FootRight].Position.Z);
 
-                        // Extra data index 25
+                        // Extra data index 25 (Kinect only)
                         writer.Write((Single)body.Joints[JointType.SpineMid].Position.X);
                         writer.Write((Single)body.Joints[JointType.SpineMid].Position.Y);
                         writer.Write((Single)body.Joints[JointType.SpineMid].Position.Z);
 
-                        // Extra data index 26
+                        // Extra data index 26 (Kinect only)
                         writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.X);
                         writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.Y);
                         writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.Z);
 
+                        // Extra data index 27 (Kinect v2.0 only)
+                        writer.Write((Single)body.Joints[JointType.ThumbLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ThumbLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ThumbLeft].Position.Z);
 
+                        // Extra data index 28 (Kinect v2.0 only)
+                        writer.Write((Single)body.Joints[JointType.ThumbRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ThumbRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ThumbRight].Position.Z);
 
                         Byte[] omicronData = ms.GetBuffer();
                         server.SendOmicronEvent(omicronData);
