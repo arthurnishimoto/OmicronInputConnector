@@ -5,11 +5,12 @@
  * 
  * Class: 
  * System: Windows 7 Professional x64
- * Copyright 2012, Electronic Visualization Laboratory, University of Illinois at Chicago.
+ * Copyright 2012-2014, Electronic Visualization Laboratory, University of Illinois at Chicago.
  * Author(s): Arthur Nishimoto
  * Version: 0.1
  * Version Notes:
  * 1/23/12      - Initial version
+ * 7/21/14      - Updating for SDK v2.0
  * ---------------------------------------------
  */
 
@@ -29,9 +30,9 @@ using Microsoft.Kinect;
 // Needed to grab dll Reference from:
 // C:\Windows\assembly\GAC_MSIL\Microsoft.Speech\11.0.0.0__31bf3856ad364e35\Microsoft.Speech.dll
 // I assume this was loaded with the Kinect 1.0 SDK
-using Microsoft.Speech;
-using Microsoft.Speech.AudioFormat;
-using Microsoft.Speech.Recognition;
+using System.Speech;
+using System.Speech.AudioFormat;
+using System.Speech.Recognition;
 
 using OmicronSDKServer;
 using System.Timers;
@@ -47,6 +48,8 @@ namespace OmegaWallConnector
         static SkeletonMode skeletonMode = SkeletonMode.Default;
 
         static Hashtable kinectTable; // List of all KinectSensor objects
+        private KinectSensor kinectSensor;
+
         private bool disabled = false;
 
         // ---- Elevation control ----
@@ -63,11 +66,12 @@ namespace OmegaWallConnector
         // ---- Skeleton Tracking ----
         // List of all skeletons (users) in current Kinect frame
         private int enabledSkeletonStreams = 0;
-        private Skeleton[] skeletonData;
+        private Body[] bodies;
+        private BodyFrameReader bodyFrameReader;
 
         // ---- Image Displays ----
         //private KinectColorViewer kinectColorViewer;
-        private KinectDepthViewer kinectDepthViewer;
+        //private KinectDepthViewer kinectDepthViewer;
         //private KinectSkeletonViewer KinectSkeletonViewerOnDepth;
 
         // ---- Audio Processing ----
@@ -88,11 +92,12 @@ namespace OmegaWallConnector
 
         public KinectManager(GUI p, OmicronServer o)
         {
+            Console.WriteLine("KinectManager: Initializing (v2.0)");
                 kinectTable = new Hashtable();
                 newElevationKinectSensorList = new ArrayList();
 
                 //kinectColorViewer = new KinectColorViewer(p);
-                kinectDepthViewer = new KinectDepthViewer(p);
+                //kinectDepthViewer = new KinectDepthViewer(p);
 
                 //KinectSkeletonViewerOnDepth = new KinectSkeletonViewer(p);
                 //KinectSkeletonViewerOnDepth.ShowBones = true;
@@ -124,29 +129,61 @@ namespace OmegaWallConnector
         // ------- Kinect Initializations ---------------------------------------------------------
         public void KinectStart()
         {
+            // SDK v2.0 only support a single Kinect
+            kinectSensor = KinectSensor.GetDefault();
+
+            // open the reader for the body frames
+            bodyFrameReader = kinectSensor.BodyFrameSource.OpenReader();
+
+            // set IsAvailableChanged event notifier
+            kinectSensor.IsAvailableChanged += Sensor_IsAvailableChanged;
+
+            // Initialize sensor
+            kinectSensor.Open();
+
+            // Callback for getting body frame data
+            if (bodyFrameReader != null)
+            {
+                bodyFrameReader.FrameArrived += Reader_FrameArrived;
+                Console.WriteLine("KinectManager: Body Frame Reader Enabled (v2.0)");
+            }
             // listen to any status change for Kinects.
-            KinectSensor.KinectSensors.StatusChanged += this.KinectsStatusChanged;
+            //KinectSensor.StatusChanged += this.KinectsStatusChanged;
 
             // show status for each sensor that is found now.
-            foreach (KinectSensor kinect in KinectSensor.KinectSensors)
-            {
-                this.ShowStatus(kinect, kinect.Status);
-            }
+            //foreach (KinectSensor kinect in KinectSensor.KinectSensors)
+            //{
+            //    this.ShowStatus(kinect, kinect.Status);
+            //}
         }
 
         public void KinectStop()
         {
+            // SDK v2.0 only support a single Kinect
+            KinectSensor.GetDefault().Close();
+
             // listen to any status change for Kinects.
-            KinectSensor.KinectSensors.StatusChanged += this.KinectsStatusChanged;
+            //KinectSensor.KinectSensors.StatusChanged += this.KinectsStatusChanged;
 
             // show status for each sensor that is found now.
-            foreach (KinectSensor kinect in KinectSensor.KinectSensors)
-            {
-                this.UninitializeKinectServices(kinect);
-            }
+            //foreach (KinectSensor kinect in KinectSensor.KinectSensors)
+            //{
+            //    this.UninitializeKinectServices(kinect);
+            //}
         }
 
-        // Callback function for Kinect status changes
+        /// <summary>
+        /// Handles the event which the sensor becomes unavailable (E.g. paused, closed, unplugged).
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void Sensor_IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
+        {
+            ///this.kinectSensor.IsAvailable;
+        }
+
+        // Callback function for Kinect status changes (SDK v1.7)
+        /*
         private void KinectsStatusChanged(object sender, StatusChangedEventArgs e)
         {
             this.ShowStatus(e.Sensor, e.Status);
@@ -179,7 +216,7 @@ namespace OmegaWallConnector
                     gui.SetKinectEnabled(false);
             }
         }
-
+        
 
         // Kinect enabled apps should customize which Kinect services it initializes here.
         private KinectSensor InitializeKinectServices(KinectSensor sensor)
@@ -256,7 +293,7 @@ namespace OmegaWallConnector
 
             return sensor;
         }
-
+        */
         void AudioReadyTick(object sender, EventArgs e)
         {
             Console.WriteLine("Kinect Voice Recognition Ready!");
@@ -265,6 +302,7 @@ namespace OmegaWallConnector
 
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
+            /*
             timeSinceLastElevationChange += timerIncrement;
 
             if (updateElevation && timeSinceLastElevationChange >= elevationTimeLimit)
@@ -280,22 +318,25 @@ namespace OmegaWallConnector
                 }
                 newElevationKinectSensorList.Clear();
             }
-
+            */
         }
 
         public int GetKinectElevation(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
 
             if (kinect != null)
             {
                 return kinect.ElevationAngle;
             }
+             * */
             return 0;
         }
 
         public void SetKinectElevation(String kinectSensorID, int angle)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
 
             if (kinect != null )
@@ -307,10 +348,12 @@ namespace OmegaWallConnector
                 if( !newElevationKinectSensorList.Contains(kinectSensorID) )
                     newElevationKinectSensorList.Add(kinectSensorID);
             }
+             * */
         }
 
         public void SetSkeletonModeDefault(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
 
             if (kinect != null)
@@ -322,10 +365,12 @@ namespace OmegaWallConnector
                     enabledSkeletonStreams++;
                 }
             }
+             * */
         }
 
         public void SetSkeletonModeSeated(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null && enabledSkeletonStreams == 0 )
             {
@@ -336,20 +381,23 @@ namespace OmegaWallConnector
                     enabledSkeletonStreams++;
                 }
             }
+             * */
         }
 
         public void SetSkeletonModeOff(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null)
             {
                 kinect.SkeletonStream.Disable();
                 enabledSkeletonStreams--;
-            }
+            }*/
         }
 
         public SkeletonMode GetSkeletonMode(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null)
             {
@@ -360,12 +408,13 @@ namespace OmegaWallConnector
                     return SkeletonMode.Seated;
                 else if (kinect.SkeletonStream.IsEnabled && kinect.SkeletonStream.TrackingMode == SkeletonTrackingMode.Default)
                     return SkeletonMode.Default;
-            }
+            }*/
             return SkeletonMode.Off;
         }
 
         public void SetNearMode(String kinectSensorID, Boolean value)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null)
             {
@@ -382,21 +431,23 @@ namespace OmegaWallConnector
                 {
                     kinect.DepthStream.Range = DepthRange.Default;
                 }
-            }
+            }*/
         }
 
         public bool GetNearMode(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null)
             {
                 return kinect.SkeletonStream.EnableTrackingInNearRange;
-            }
+            }*/
             return false;
         }
 
         public bool HasNearModeSupport(String kinectSensorID)
         {
+            /*
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             try
             {
@@ -407,7 +458,7 @@ namespace OmegaWallConnector
             catch (InvalidOperationException)
             {
                 kinect.DepthStream.Range = DepthRange.Default;
-            }
+            }*/
             return false;
         }
 
@@ -416,7 +467,7 @@ namespace OmegaWallConnector
             KinectSensor kinect = (KinectSensor)kinectTable[kinectSensorID];
             if (kinect != null)
             {
-                kinectDepthViewer.Kinect = kinect;
+                //kinectDepthViewer.Kinect = kinect;
             }
            
         }
@@ -424,13 +475,13 @@ namespace OmegaWallConnector
         // Kinect enabled apps should uninitialize all Kinect services that were initialized in InitializeKinectServices() here.
         private void UninitializeKinectServices(KinectSensor sensor)
         {
-            sensor.Stop();
+            //sensor.Stop();
 
-            sensor.SkeletonFrameReady -= this.SkeletonsReady;
-            kinectTable.Remove(sensor.DeviceConnectionId);
-            gui.removeKinectSensorToList(sensor.DeviceConnectionId);
+            //sensor.SkeletonFrameReady -= this.SkeletonsReady;
+            //kinectTable.Remove(sensor.DeviceConnectionId);
+            //gui.removeKinectSensorToList(sensor.DeviceConnectionId);
 
-            kinectDepthViewer.Kinect = null;
+            //kinectDepthViewer.Kinect = null;
             //KinectSkeletonViewerOnDepth.Kinect = null;
 
             if (speechRecognizer != null)
@@ -443,6 +494,245 @@ namespace OmegaWallConnector
         }
 
         // ---- Skeleton Tracking Functions -----------------------------------------------------------------------
+        /// <summary>
+        /// Handles the body frame data arriving from the sensor
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void Reader_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
+        {
+            bool dataReceived = false;
+
+            using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
+            {
+                if (bodyFrame != null)
+                {
+                    if (this.bodies == null)
+                    {
+                        this.bodies = new Body[bodyFrame.BodyCount];
+                    }
+
+                    // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
+                    // As long as those body objects are not disposed and not set to null in the array,
+                    // those body objects will be re-used.
+                    bodyFrame.GetAndRefreshBodyData(this.bodies);
+                    dataReceived = true;
+                }
+            }
+
+            if (dataReceived)
+            {
+                foreach (Body body in this.bodies)
+                {
+                    if (body.IsTracked)
+                    {
+                        DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 0);
+                        long timeStamp = (DateTime.UtcNow - baseTime).Ticks / 10000;
+
+                        // Omicron (binary) data
+                        MemoryStream ms = new MemoryStream();
+                        BinaryWriter writer = new BinaryWriter(ms);
+                        writer.Write((UInt32)timeStamp);     // Timestamp
+                        writer.Write((UInt32)body.TrackingId);    // sourceID
+                        writer.Write((UInt32)0);    // serviceID
+                        writer.Write((UInt32)EventBase.ServiceType.ServiceTypeMocap);    // serviceType
+                        writer.Write((UInt32)EventBase.Type.Update);    // type
+                        writer.Write((UInt32)0);    // flags
+
+                        // Head pos
+                        writer.Write((Single)body.Joints[JointType.Head].Position.X);    // posx
+                        writer.Write((Single)body.Joints[JointType.Head].Position.Y);    // posy
+                        writer.Write((Single)body.Joints[JointType.Head].Position.Z);    // posz
+                        writer.Write((Single)0);    // orx
+                        writer.Write((Single)0);    // ory
+                        writer.Write((Single)0);    // orz
+                        writer.Write((Single)0);    // orw
+
+                        Console.WriteLine("KinectManager: Receiving Head Data (v2.0)");
+                        Console.Write("Position:  " + (Single)body.Joints[JointType.Head].Position.X );
+                        Console.Write("," + (Single)body.Joints[JointType.Head].Position.Y);
+                        Console.Write("," + (Single)body.Joints[JointType.Head].Position.Z+ "\n");
+
+                        writer.Write((UInt32)EventBase.ExtraDataType.ExtraDataVector3Array);    // extraDataType
+
+                        int extraDataItems = 27;
+                        writer.Write((UInt32)extraDataItems);    // extraDataItems
+
+
+                        int myExtraDataValidMask = 0;
+
+                        myExtraDataValidMask |= (1 << 0);
+                        myExtraDataValidMask |= (1 << 1);
+                        myExtraDataValidMask |= (1 << 6);
+                        myExtraDataValidMask |= (1 << 7);
+                        myExtraDataValidMask |= (1 << 8);
+                        myExtraDataValidMask |= (1 << 9);
+                        myExtraDataValidMask |= (1 << 11);
+                        myExtraDataValidMask |= (1 << 12);
+                        myExtraDataValidMask |= (1 << 13);
+                        myExtraDataValidMask |= (1 << 14);
+                        myExtraDataValidMask |= (1 << 16);
+                        myExtraDataValidMask |= (1 << 17);
+                        myExtraDataValidMask |= (1 << 18);
+                        myExtraDataValidMask |= (1 << 19);
+                        myExtraDataValidMask |= (1 << 21);
+                        myExtraDataValidMask |= (1 << 22);
+                        myExtraDataValidMask |= (1 << 23);
+                        myExtraDataValidMask |= (1 << 24);
+                        myExtraDataValidMask |= (1 << 25);
+                        myExtraDataValidMask |= (1 << 26);
+
+                        writer.Write((UInt32)myExtraDataValidMask);    // extraDataMask
+
+                        // Extra data index 0: Hip Center (Kinect v1.x only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 1
+                        writer.Write((Single)body.Joints[JointType.Head].Position.X);
+                        writer.Write((Single)body.Joints[JointType.Head].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.Head].Position.Z);
+
+                        // Extra data index 2: Neck (OpenNI only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 3: Torso (OpenNI only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 4: Waist (OpenNI only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 5: Left Collar (OpenNI only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 6
+                        writer.Write((Single)body.Joints[JointType.ShoulderLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ShoulderLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ShoulderLeft].Position.Z);
+
+                        // Extra data index 7
+                        writer.Write((Single)body.Joints[JointType.ElbowLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ElbowLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ElbowLeft].Position.Z);
+
+                        // Extra data index 8
+                        writer.Write((Single)body.Joints[JointType.WristLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.WristLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.WristLeft].Position.Z);
+
+                        // Extra data index 9
+                        writer.Write((Single)body.Joints[JointType.HandLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HandLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HandLeft].Position.Z);
+
+                        // Extra data index 10: Left Fingertip (OpenNI and Kinect v2.0 only)
+                        writer.Write((Single)body.Joints[JointType.HandTipLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HandTipLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HandTipLeft].Position.Z);
+
+                        // Extra data index 11
+                        writer.Write((Single)body.Joints[JointType.HipLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HipLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HipLeft].Position.Z);
+
+                        // Extra data index 12
+                        writer.Write((Single)body.Joints[JointType.KneeLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.KneeLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.KneeLeft].Position.Z);
+
+                        // Extra data index 13
+                        writer.Write((Single)body.Joints[JointType.AnkleLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.AnkleLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.AnkleLeft].Position.Z);
+
+                        // Extra data index 14
+                        writer.Write((Single)body.Joints[JointType.FootLeft].Position.X);
+                        writer.Write((Single)body.Joints[JointType.FootLeft].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.FootLeft].Position.Z);
+
+                        // Extra data index 15: Right Collar (OpenNI only)
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+                        writer.Write((Single)0);
+
+                        // Extra data index 16
+                        writer.Write((Single)body.Joints[JointType.ShoulderRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ShoulderRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ShoulderRight].Position.Z);
+
+                        // Extra data index 17
+                        writer.Write((Single)body.Joints[JointType.ElbowRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.ElbowRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.ElbowRight].Position.Z);
+
+                        // Extra data index 18
+                        writer.Write((Single)body.Joints[JointType.WristRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.WristRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.WristRight].Position.Z);
+
+                        // Extra data index 19
+                        writer.Write((Single)body.Joints[JointType.HandRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HandRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HandRight].Position.Z);
+
+                        // Extra data index 20: Right Fingertip (OpenNI and Kinect v2.0 only)
+                        writer.Write((Single)body.Joints[JointType.HandTipRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HandTipRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HandTipRight].Position.Z);
+
+                        // Extra data index 21
+                        writer.Write((Single)body.Joints[JointType.HipRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.HipRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.HipRight].Position.Z);
+
+                        // Extra data index 22
+                        writer.Write((Single)body.Joints[JointType.KneeRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.KneeRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.KneeRight].Position.Z);
+
+                        // Extra data index 23
+                        writer.Write((Single)body.Joints[JointType.AnkleRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.AnkleRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.AnkleRight].Position.Z);
+
+                        // Extra data index 24
+                        writer.Write((Single)body.Joints[JointType.FootRight].Position.X);
+                        writer.Write((Single)body.Joints[JointType.FootRight].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.FootRight].Position.Z);
+
+                        // Extra data index 25
+                        writer.Write((Single)body.Joints[JointType.SpineMid].Position.X);
+                        writer.Write((Single)body.Joints[JointType.SpineMid].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.SpineMid].Position.Z);
+
+                        // Extra data index 26
+                        writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.X);
+                        writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.Y);
+                        writer.Write((Single)body.Joints[JointType.SpineShoulder].Position.Z);
+
+
+
+                        Byte[] omicronData = ms.GetBuffer();
+                        server.SendOmicronEvent(omicronData);
+
+                        //foreach (JointType jointType in joints.Keys)
+                        //{
+                        //    joints[jointType].Position;
+                        //}
+                    }
+                }
+            }
+        }
+        /* (SDK v1.7)
         private void SkeletonsReady(object sender, SkeletonFrameReadyEventArgs e)
         {
             using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
@@ -669,6 +959,7 @@ namespace OmegaWallConnector
                 }
             }
         }
+        */
 
         // ---- General Kinect Audio Setup  -----------------------------------------------------------------------
 
@@ -935,6 +1226,7 @@ namespace OmegaWallConnector
 
         public void GenerateNewSpeechGrammar()
         {
+            /*
             RecognizerInfo ri = GetKinectRecognizer();
 
             speechChoices = new Choices();
@@ -976,6 +1268,7 @@ namespace OmegaWallConnector
                 // Load new grammar
                 recognitionEngine.LoadGrammarAsync(g);
             }
+             * */
         }
 
         private void SreSpeechRecognitionRejected(object sender, SpeechRecognitionRejectedEventArgs e)
@@ -994,8 +1287,9 @@ namespace OmegaWallConnector
 
         private void SreSpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
+            /*
             string status = "Recognized: " + e.Result.Text + " " + e.Result.Confidence;
-            
+
             double sourceAngle = speechSensor.AudioSource.SoundSourceAngle;
             double sourceAngleConfidence = speechSensor.AudioSource.SoundSourceAngleConfidence;
 
@@ -1077,6 +1371,7 @@ namespace OmegaWallConnector
                     }
                 }
             }// if minConfidence
+             * */
         }// SreSpeechRecognized
 
         private void SendKinectSpeech(String speechSaid, float speechAccuracy, float angle, float angleAccuracy)

@@ -5,9 +5,9 @@
  * 
  * Class: 
  * System: Windows 7 Professional x64
- * Copyright 2010, Electronic Visualization Laboratory, University of Illinois at Chicago.
+ * Copyright 2010-2014, Electronic Visualization Laboratory, University of Illinois at Chicago.
  * Author(s): Arthur Nishimoto
- * Version: 0.1
+ * Version: 2.0
  * Version Notes:
  * 6/1/10      - Initial version
  * 6/3/10      - TouchAPI_Server support
@@ -66,7 +66,7 @@ namespace OmegaWallConnector
             catch (Exception e)
             {
                 //Console.WriteLine("KinectManager: Initialization exception: {0}", e.Message);
-                Console.WriteLine("KinectManager: Failed to find Kinect SDK v1.7");
+                Console.WriteLine("KinectManager: Failed to find Kinect SDK v2.0");
                 Console.WriteLine("KinectManager: Disabling Kinect");
             }
 

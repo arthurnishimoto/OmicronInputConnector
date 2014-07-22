@@ -5,7 +5,7 @@
  * 
  * Class: 
  * System: Windows 7 Professional x64
- * Copyright 2010, Electronic Visualization Laboratory, University of Illinois at Chicago.
+ * Copyright 2010-2014, Electronic Visualization Laboratory, University of Illinois at Chicago.
  * Author(s): Arthur Nishimoto
  * Version: 0.1
  * Version Notes:

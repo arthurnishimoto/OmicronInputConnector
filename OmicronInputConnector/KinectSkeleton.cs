@@ -57,7 +57,7 @@ namespace OmegaWallConnector
 
         private Dictionary<JointType, JointMapping> jointMappings;
         private Point centerPoint;
-        private Skeleton currentSkeleton;
+        private Body currentSkeleton;
         private double scale = 1.0;
 
         public bool ShowClippedEdges
@@ -93,7 +93,7 @@ namespace OmegaWallConnector
         /// <param name="center">This is a pre-mapped point to the skeleton's center position.</param>
         /// <param name="scaleFactor">1 will render the bones and joints at a good size for a 640x480 image.
         /// The method would expect 0.5 to render a 320x240 scaled image.</param>
-        public void RefreshSkeleton(Skeleton skeleton, Dictionary<JointType, JointMapping> mappings, Point center, double scaleFactor)
+        public void RefreshSkeleton(Body skeleton, Dictionary<JointType, JointMapping> mappings, Point center, double scaleFactor)
         {
             this.centerPoint = center;
             this.jointMappings = mappings;
@@ -121,6 +121,7 @@ namespace OmegaWallConnector
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            /*
             base.OnRender(drawingContext);
 
             // Don't render if we don't have a skeleton, or it isn't tracked
@@ -150,10 +151,12 @@ namespace OmegaWallConnector
                     this.DrawBonesAndJoints(drawingContext);
                 break;
             }
+             * */
         }
 
         private void RenderClippedEdges(DrawingContext drawingContext)
         {
+            /*
             if (!this.ShowClippedEdges || 
                 this.currentSkeleton.ClippedEdges.Equals(FrameEdges.None))
             {
@@ -192,10 +195,12 @@ namespace OmegaWallConnector
                     null,
                     new Rect(this.RenderSize.Width - scaledThickness, 0, scaledThickness, this.RenderSize.Height));
             }
+             * */
         }
 
         private void DrawBonesAndJoints(DrawingContext drawingContext)
         {
+            /*
             if (this.ShowBones)
             {
                 // Render Torso
@@ -249,11 +254,12 @@ namespace OmegaWallConnector
                         drawingContext.DrawEllipse(drawBrush, null, joint.MappedPoint, JointThickness * this.scale, JointThickness * this.scale);
                     }
                 }
-            }
+            }*/
         }
 
         private void DrawBone(DrawingContext drawingContext, JointType jointType1, JointType jointType2)
         {
+            /*
             JointMapping joint1;
             JointMapping joint2;
 
@@ -282,7 +288,7 @@ namespace OmegaWallConnector
                 drawPen.Thickness = TrackedBoneThickness * this.scale;
             }
 
-            drawingContext.DrawLine(drawPen, joint1.MappedPoint, joint2.MappedPoint);
+            drawingContext.DrawLine(drawPen, joint1.MappedPoint, joint2.MappedPoint);*/
         }
     }
 }
