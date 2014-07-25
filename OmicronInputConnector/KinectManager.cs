@@ -543,10 +543,10 @@ namespace OmegaWallConnector
                         writer.Write((Single)body.Joints[JointType.Head].Position.X);    // posx
                         writer.Write((Single)body.Joints[JointType.Head].Position.Y);    // posy
                         writer.Write((Single)body.Joints[JointType.Head].Position.Z);    // posz
-                        writer.Write((Single)0);    // orx
-                        writer.Write((Single)0);    // ory
-                        writer.Write((Single)0);    // orz
-                        writer.Write((Single)0);    // orw
+                        writer.Write((Single)body.HandLeftState);    // orw
+                        writer.Write((Single)body.HandRightState);    // orx
+                        writer.Write((Single)body.HandLeftConfidence);    // ory
+                        writer.Write((Single)body.HandRightConfidence);    // orz
 
                         Console.WriteLine("KinectManager: Receiving Head Data (v2.0)");
                         Console.Write("Position:  " + (Single)body.Joints[JointType.Head].Position.X );
